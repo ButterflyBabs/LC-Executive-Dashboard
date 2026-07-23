@@ -16,6 +16,7 @@ import {
   Sparkles,
   Settings,
   BarChart3,
+  Layers,
 } from "lucide-react";
 
 const navigation = [
@@ -27,6 +28,7 @@ const navigation = [
   { name: "VOICE", icon: Megaphone, href: "/dashboard/voice" },
   { name: "LEARN", icon: PlayCircle, href: "/dashboard/learn" },
   { name: "DIMENSIONS", icon: BarChart3, href: "/dashboard/dimensions" },
+  { name: "SEGMENTS", icon: Layers, href: "/dashboard/segments" },
   { name: "SACRED KALEIDOSCOPE", icon: Building2, href: "/dashboard/sacred-kaleidoscope" },
   { name: "TITANIUM", icon: Puzzle, href: "/dashboard/titanium" },
   { name: "AI", icon: Sparkles, href: "/dashboard/ai" },
