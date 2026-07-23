@@ -58,7 +58,8 @@ export async function GET(request: NextRequest) {
       { businessId: businessMap.get("carroll-media"), name: "Video Production", slug: "video", description: "Video production", icon: "🎥", color: "#9DA890", sortOrder: 3 },
     ];
 
-    const insertedSegments = await db.insert(segments).values(segmentsData.filter(s => s.businessId)).returning();
+    const validSegments = segmentsData.filter((s): s is typeof s & { businessId: number } => !!s.businessId);
+    const insertedSegments = await db.insert(segments).values(validSegments).returning();
 
     // Seed dimension scores for each segment
     const dimensionsList = ["marketing", "sales", "operations", "finance", "team", "systems", "leadership", "vision", "product", "customer_experience", "legal", "sustainability"];
