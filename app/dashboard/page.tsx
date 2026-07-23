@@ -17,11 +17,10 @@ import {
   Mic,
   Clock,
   TrendingUp,
-  ChevronRight,
   Bell,
   Search,
-  MoreHorizontal,
 } from "lucide-react";
+import Image from "next/image";
 
 const navigation = [
   { name: "TODAY", icon: Home, id: "today" },
@@ -63,17 +62,28 @@ export default function Dashboard() {
       {/* Sidebar */}
       <aside className="w-64 bg-navy text-white flex flex-col">
         {/* Logo */}
-        <div className="p-6">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🦋</span>
+            {/* Butterfly Logo */}
+            <div className="relative w-10 h-10 flex-shrink-0">
+              <svg viewBox="0 0 40 40" className="w-full h-full">
+                <path d="M20 35C20 35 12 28 12 20C12 12 16 8 20 8C24 8 28 12 28 20C28 28 20 35 20 35Z" fill="#c9a227"/>
+                <path d="M20 8C20 8 8 12 8 22C8 30 16 32 20 35C24 32 32 30 32 22C32 12 20 8 20 8Z" stroke="white" strokeWidth="1.5" fill="none"/>
+                <path d="M20 8L20 35" stroke="white" strokeWidth="1"/>
+                <ellipse cx="14" cy="18" rx="5" ry="8" fill="white" opacity="0.9"/>
+                <ellipse cx="26" cy="18" rx="5" ry="8" fill="white" opacity="0.9"/>
+                <circle cx="20" cy="14" r="2" fill="#c9a227"/>
+              </svg>
+            </div>
             <div>
               <h1 className="font-serif text-xl font-medium tracking-wide">LifeCharter</h1>
+              <p className="text-[10px] text-white/50 tracking-[0.2em] uppercase">Executive Dashboard</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 space-y-0.5">
+        <nav className="flex-1 py-6 px-3 space-y-1">
           {navigation.map((item) => (
             <button
               key={item.id}
@@ -95,17 +105,24 @@ export default function Dashboard() {
           ))}
         </nav>
 
+        {/* Brand Tagline */}
+        <div className="px-6 py-4">
+          <p className="text-[10px] text-white/30 text-center italic font-serif">
+            &ldquo;One dashboard. All businesses.&rdquo;
+          </p>
+        </div>
+
         {/* User */}
-        <div className="p-4 m-4 bg-white/5 rounded-2xl">
+        <div className="p-4 m-4 bg-white/5 rounded-2xl border border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-navy font-bold text-lg">
               B
             </div>
-            <div className="flex-1">
-              <p className="font-medium text-sm">Babs</p>
-              <p className="text-xs text-white/50">Alignment Architect</p>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm truncate">Babs</p>
+              <p className="text-xs text-white/50 truncate">Alignment Architect</p>
             </div>
-            <Settings className="w-5 h-5 text-white/40 hover:text-white cursor-pointer transition-colors" />
+            <Settings className="w-5 h-5 text-white/40 hover:text-white cursor-pointer transition-colors flex-shrink-0" />
           </div>
         </div>
       </aside>
@@ -116,10 +133,13 @@ export default function Dashboard() {
         <header className="px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-serif text-navy">
-                Good morning, Babs <span className="text-2xl">🦋</span>
-              </h2>
-              <p className="text-soft-taupe mt-1 text-sm">
+              <div className="flex items-center gap-3 mb-1">
+                <h2 className="text-3xl font-serif text-navy">
+                  Good morning, Babs
+                </h2>
+                <span className="text-2xl">🦋</span>
+              </div>
+              <p className="text-soft-taupe text-sm">
                 Thursday, July 23
               </p>
             </div>
@@ -131,7 +151,8 @@ export default function Dashboard() {
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-gold rounded-full"></span>
               </button>
-              <button className="px-6 py-3 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow">
+              <button className="px-6 py-3 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
                 Start My Day
               </button>
             </div>
@@ -146,7 +167,9 @@ export default function Dashboard() {
             <div className="bg-white rounded-2xl p-6 soft-shadow card-hover">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-serif text-xl text-navy">Your Morning Brief</h3>
-                <span className="text-2xl opacity-80">🦋</span>
+                <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center">
+                  <span className="text-lg">🦋</span>
+                </div>
               </div>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
@@ -306,6 +329,22 @@ export default function Dashboard() {
                 <Mic className="w-6 h-6 text-navy" />
               </button>
             </div>
+          </div>
+
+          {/* Footer Branding */}
+          <div className="flex items-center justify-center gap-2 pt-4 pb-2">
+            <div className="w-6 h-6">
+              <svg viewBox="0 0 40 40" className="w-full h-full">
+                <path d="M20 35C20 35 12 28 12 20C12 12 16 8 20 8C24 8 28 12 28 20C28 28 20 35 20 35Z" fill="#c9a227"/>
+                <path d="M20 8C20 8 8 12 8 22C8 30 16 32 20 35C24 32 32 30 32 22C32 12 20 8 20 8Z" stroke="#1a2b4a" strokeWidth="1.5" fill="none"/>
+                <ellipse cx="14" cy="18" rx="5" ry="8" fill="#1a2b4a" opacity="0.8"/>
+                <ellipse cx="26" cy="18" rx="5" ry="8" fill="#1a2b4a" opacity="0.8"/>
+                <circle cx="20" cy="14" r="2" fill="#c9a227"/>
+              </svg>
+            </div>
+            <span className="text-soft-taupe text-sm font-serif">LifeCharter</span>
+            <span className="text-soft-taupe/50 text-xs">|</span>
+            <span className="text-soft-taupe/50 text-xs">Executive Dashboard</span>
           </div>
         </div>
       </main>
