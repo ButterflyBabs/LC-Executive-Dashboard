@@ -96,11 +96,17 @@ export default function DimensionsPage() {
   const [editingDimension, setEditingDimension] = useState<DimensionHealth | null>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    dimension: string;
+    businessId: string;
+    score: number;
+    health: "healthy" | "attention" | "at_risk";
+    notes: string;
+  }>({
     dimension: "",
     businessId: "",
     score: 70,
-    health: "healthy" as const,
+    health: "healthy",
     notes: "",
   });
 
