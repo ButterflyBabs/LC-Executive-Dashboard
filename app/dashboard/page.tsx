@@ -524,35 +524,31 @@ export default function Dashboard() {
 
       {/* Dashboard Content */}
       <div className="px-8 pb-8">
-        <div className="flex gap-6">
-          {/* Main Cards Grid */}
-          <div className="flex-1">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={cards.map((c) => c.id)} strategy={rectSortingStrategy}>
-                <div className="grid grid-cols-3 gap-6">
-                  {cards.map((card) => (
-                    <DraggableDashboardCard
-                      key={card.id}
-                      card={card}
-                      onToggle={toggleCard}
-                      onRemove={removeCard}
-                    >
-                      {renderCardContent(card)}
-                    </DraggableDashboardCard>
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          </div>
+        {/* Main Cards Grid */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={cards.map((c) => c.id)} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-3 gap-6">
+              {cards.map((card) => (
+                <DraggableDashboardCard
+                  key={card.id}
+                  card={card}
+                  onToggle={toggleCard}
+                  onRemove={removeCard}
+                >
+                  {renderCardContent(card)}
+                </DraggableDashboardCard>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
 
-          {/* Color Key Sidebar */}
-          <div className="w-80 flex-shrink-0">
-            <ColorKey onAddSegment={() => window.location.href = '/dashboard/segments'} />
-          </div>
+        {/* Color Key - Horizontal at Bottom */}
+        <div className="mt-8">
+          <ColorKey />
         </div>
 
         {/* Footer */}
