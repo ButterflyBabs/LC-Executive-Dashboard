@@ -18,7 +18,11 @@ import {
   Edit3,
   Plus,
   MoreHorizontal,
+  RefreshCw,
+  Activity,
 } from "lucide-react";
+import { HealthCheckWizard } from "@/components/ui/health-check-wizard";
+import { calculateAllDimensions, getOverallHealth, getHealthStatus, HealthMetrics } from "@/lib/health-calculator";
 
 // Types
 interface Segment {
@@ -84,6 +88,8 @@ export default function SegmentDetailPage() {
   const [revenue, setRevenue] = useState<RevenueData[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showHealthWizard, setShowHealthWizard] = useState(false);
+  const [autoCalculatedScores, setAutoCalculatedScores] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     fetchSegmentData();
@@ -123,6 +129,63 @@ export default function SegmentDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Calculate health metrics from real data
+  const calculateHealthMetrics = (): HealthMetrics => {
+    const totalRevenue = revenue.reduce((acc, r) => acc + r.actual, 0);
+    const totalTarget = revenue.reduce((acc, r) => acc + r.target, 0);
+    const lastMonthRevenue = revenue.length > 1 ? revenue[1].actual : totalRevenue;
+    
+    const completedTasks = tasks.filter(t => t.status === "done").length;
+    const overdueTasks = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "done").length;
+    
+    return {
+      revenue: {
+        actual: totalRevenue,
+        target: totalTarget || 10000,
+        lastMonth: lastMonthRevenue,
+      },
+      tasks: {
+        total: tasks.length,
+        completed: completedTasks,
+        overdue: overdueTasks,
+      },
+      leads: {
+        new: 0,
+        converted: 0,
+        target: 10,
+      },
+      customers: {
+        total: 0,
+        churned: 0,
+        satisfaction: 80,
+      },
+      team: {
+        members: 1,
+        openPositions: 0,
+        satisfaction: 80,
+      },
+      expenses: {
+        actual: totalRevenue * 0.7,
+        budget: totalTarget * 0.7,
+      },
+    };
+  };
+
+  // Auto-calculate dimension scores
+  const autoCalculateHealth = () => {
+    const metrics = calculateHealthMetrics();
+    const calculated = calculateAllDimensions(metrics);
+    setAutoCalculatedScores(calculated);
+    
+    // Show comparison
+    const currentAvg = dimensionScores.length > 0
+      ? Math.round(dimensionScores.reduce((acc, d) => acc + d.score, 0) / dimensionScores.length)
+      : 0;
+    const calculatedAvg = getOverallHealth(calculated);
+    
+    return { calculated, currentAvg, calculatedAvg };
   };
 
   // Calculate average dimension score
@@ -204,9 +267,19 @@ export default function SegmentDetailPage() {
           </div>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all">
-            <Edit3 className="w-4 h-4" />
-            Edit
+          <button 
+            onClick={() => setShowHealthWizard(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all"
+          >
+            <Activity className="w-4 h-4" />
+            Health Check
+          </button>
+          <button 
+            onClick={autoCalculateHealth}
+            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Auto-Calculate
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow">
             <Plus className="w-4 h-4" />
@@ -481,6 +554,105 @@ export default function SegmentDetailPage() {
             <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
             <p>Calendar integration coming soon.</p>
             <p className="text-sm">Connect your Google Calendar to see events here.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Health Check Wizard */}
+      {showHealthWizard && (
+        <HealthCheckWizard
+          segmentId={segment?.id || 0}
+          segmentName={segment?.name || ""}
+          currentScores={dimensionScores.reduce((acc, d) => ({ ...acc, [d.dimension]: d.score }), {})}
+          onComplete={async (scores) => {
+            // Save scores to database
+            for (const [dimension, score] of Object.entries(scores)) {
+              await fetch(`/api/segments/${slug}/dimensions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  dimension,
+                  score,
+                  health: getHealthStatus(score),
+                }),
+              });
+            }
+            // Refresh data
+            fetchSegmentData();
+            setShowHealthWizard(false);
+          }}
+          onCancel={() => setShowHealthWizard(false)}
+        />
+      )}
+
+      {/* Auto-Calculation Results */}
+      {autoCalculatedScores && (
+        <div className="fixed inset-0 bg-navy/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-serif text-navy mb-6">Auto-Calculated Health Scores</h2>
+            <p className="text-soft-taupe mb-6">Based on your actual data (revenue, tasks, etc.)</p>
+            
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              {dimensionsList.map((dim) => {
+                const current = dimensionScores.find(d => d.dimension === dim.id)?.score || 0;
+                const calculated = autoCalculatedScores[dim.id] || 0;
+                const diff = calculated - current;
+                
+                return (
+                  <div key={dim.id} className="p-4 rounded-xl bg-cream-dark/30">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">{dim.icon}</span>
+                      <span className="font-medium text-navy text-sm">{dim.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-center">
+                        <p className="text-xs text-soft-taupe">Current</p>
+                        <p className="font-bold text-navy">{current}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-soft-taupe">Calculated</p>
+                        <p className="font-bold text-gold">{calculated}</p>
+                      </div>
+                    </div>
+                    {diff !== 0 && (
+                      <p className={`text-xs text-center mt-2 ${diff > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {diff > 0 ? '+' : ''}{diff}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setAutoCalculatedScores(null)}
+                className="flex-1 px-6 py-3 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all"
+              >
+                Close
+              </button>
+              <button
+                onClick={async () => {
+                  // Apply calculated scores
+                  for (const [dimension, score] of Object.entries(autoCalculatedScores)) {
+                    await fetch(`/api/segments/${slug}/dimensions`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        dimension,
+                        score,
+                        health: getHealthStatus(score),
+                      }),
+                    });
+                  }
+                  fetchSegmentData();
+                  setAutoCalculatedScores(null);
+                }}
+                className="flex-1 px-6 py-3 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow"
+              >
+                Apply Calculated Scores
+              </button>
+            </div>
           </div>
         </div>
       )}
