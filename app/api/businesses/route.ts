@@ -33,3 +33,50 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ businesses: mockBusinesses });
   }
 }
+
+// POST /api/businesses - Create new business
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, slug, icon, color, description } = body;
+
+    // Check if we have a database connection
+    if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("localhost")) {
+      // Return mock success
+      const newBusiness = {
+        id: mockBusinesses.length + 1,
+        name,
+        slug,
+        icon,
+        color,
+        description,
+        health: "healthy",
+        active: true,
+        sortOrder: mockBusinesses.length + 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockBusinesses.push(newBusiness);
+      return NextResponse.json({ business: newBusiness }, { status: 201 });
+    }
+
+    const [newBusiness] = await db
+      .insert(businesses)
+      .values({
+        name,
+        slug,
+        icon,
+        color,
+        description,
+      })
+      .returning();
+
+    return NextResponse.json({ business: newBusiness }, { status: 201 });
+  } catch (error) {
+    console.error("Error creating business:", error);
+    return NextResponse.json(
+      { error: "Failed to create business" },
+      { status: 500 }
+    );
+  }
+}

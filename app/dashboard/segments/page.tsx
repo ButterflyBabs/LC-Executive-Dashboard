@@ -49,12 +49,17 @@ export default function SegmentsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({
     businessId: "",
+    businessName: "",
+    businessSlug: "",
+    businessIcon: "",
+    businessColor: "",
     name: "",
     slug: "",
     description: "",
     icon: "",
     color: "",
   });
+  const [createNewBusiness, setCreateNewBusiness] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -373,18 +378,48 @@ export default function SegmentsPage() {
               onSubmit={async (e) => {
                 e.preventDefault();
                 try {
+                  let businessId = formData.businessId;
+
+                  // If creating new business, create it first
+                  if (createNewBusiness) {
+                    const businessRes = await fetch("/api/businesses", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        name: formData.businessName,
+                        slug: formData.businessSlug,
+                        icon: formData.businessIcon,
+                        color: formData.businessColor,
+                        description: "",
+                      }),
+                    });
+                    if (businessRes.ok) {
+                      const businessData = await businessRes.json();
+                      businessId = businessData.business.id;
+                    }
+                  }
+
                   const response = await fetch("/api/segments", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                      ...formData,
-                      businessId: parseInt(formData.businessId),
+                      businessId: parseInt(businessId),
+                      name: formData.name,
+                      slug: formData.slug,
+                      description: formData.description,
+                      icon: formData.icon,
+                      color: formData.color,
                     }),
                   });
                   if (response.ok) {
                     setShowAddModal(false);
+                    setCreateNewBusiness(false);
                     setFormData({
                       businessId: "",
+                      businessName: "",
+                      businessSlug: "",
+                      businessIcon: "",
+                      businessColor: "",
                       name: "",
                       slug: "",
                       description: "",
@@ -398,23 +433,107 @@ export default function SegmentsPage() {
                 }
               }}
             >
-              {/* Business */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-navy mb-2">Business</label>
-                <select
-                  value={formData.businessId}
-                  onChange={(e) => setFormData({ ...formData, businessId: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
-                  required
-                >
-                  <option value="">Select a business...</option>
-                  {businesses.map((business) => (
-                    <option key={business.id} value={business.id}>
-                      {business.icon} {business.name}
-                    </option>
-                  ))}
-                </select>
+              {/* Create New Business Toggle */}
+              <div className="mb-4 flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="createBusiness"
+                  checked={createNewBusiness}
+                  onChange={(e) => setCreateNewBusiness(e.target.checked)}
+                  className="w-5 h-5 rounded border-soft-taupe/30 text-gold focus:ring-gold"
+                />
+                <label htmlFor="createBusiness" className="text-sm font-medium text-navy">
+                  Create new business (e.g., Babs and Beau's Journey)
+                </label>
               </div>
+
+              {/* Existing Business Select */}
+              {!createNewBusiness && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-navy mb-2">Select Existing Business</label>
+                  <select
+                    value={formData.businessId}
+                    onChange={(e) => setFormData({ ...formData, businessId: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+                    required={!createNewBusiness}
+                  >
+                    <option value="">Select a business...</option>
+                    {businesses.map((business) => (
+                      <option key={business.id} value={business.id}>
+                        {business.icon} {business.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* New Business Fields */}
+              {createNewBusiness && (
+                <div className="mb-4 p-4 bg-cream-dark/30 rounded-xl space-y-4">
+                  <h4 className="font-medium text-navy">New Business Details</h4>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-navy mb-2">Business Name</label>
+                    <input
+                      type="text"
+                      value={formData.businessName}
+                      onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+                      placeholder="e.g., Babs and Beau's Journey"
+                      required={createNewBusiness}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-navy mb-2">Business Slug</label>
+                    <input
+                      type="text"
+                      value={formData.businessSlug}
+                      onChange={(e) => setFormData({ ...formData, businessSlug: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+                      placeholder="e.g., babs-beau-journey"
+                      required={createNewBusiness}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-navy mb-2">Business Icon (emoji)</label>
+                    <input
+                      type="text"
+                      value={formData.businessIcon}
+                      onChange={(e) => setFormData({ ...formData, businessIcon: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+                      placeholder="e.g., 🐾"
+                      maxLength={2}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-navy mb-2">Business Color</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {[
+                        "#7B4F8C", "#5E3B6C", "#4A2E55", "#8B6B9C",
+                        "#3A9CA5", "#2E7C83", "#256A70",
+                        "#E4C473", "#D4AF63", "#C49F53",
+                        "#3A4F7A", "#1F315B",
+                        "#BDC8B0", "#ADB8A0", "#9DA890",
+                        "#CBA488", "#D4A574", "#E8B89A",
+                        "#8B7B6B", "#6B5B4F",
+                      ].map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, businessColor: color })}
+                          className={`w-8 h-8 rounded-lg transition-all ${
+                            formData.businessColor === color ? "ring-2 ring-navy ring-offset-2" : ""
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Name */}
               <div className="mb-4">
@@ -494,7 +613,22 @@ export default function SegmentsPage() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setCreateNewBusiness(false);
+                    setFormData({
+                      businessId: "",
+                      businessName: "",
+                      businessSlug: "",
+                      businessIcon: "",
+                      businessColor: "",
+                      name: "",
+                      slug: "",
+                      description: "",
+                      icon: "",
+                      color: "",
+                    });
+                  }}
                   className="flex-1 px-6 py-3 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all"
                 >
                   Cancel
@@ -503,7 +637,7 @@ export default function SegmentsPage() {
                   type="submit"
                   className="flex-1 px-6 py-3 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow"
                 >
-                  Create Segment
+                  {createNewBusiness ? "Create Business & Segment" : "Create Segment"}
                 </button>
               </div>
             </form>
