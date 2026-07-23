@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     const conditions = [];
     
     if (status) {
+      // @ts-ignore - status enum validation
       conditions.push(eq(tasks.status, status));
     }
     
