@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 33% 94%;
+    --foreground: 222 50% 24%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 50% 24%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 50% 24%;
+    --primary: 222 50% 24%;
+    --primary-foreground: 40 33% 94%;
+    --secondary: 280 28% 33%;
+    --secondary-foreground: 40 33% 94%;
+    --muted: 40 20% 90%;
+    --muted-foreground: 222 20% 40%;
+    --accent: 184 48% 34%;
+    --accent-foreground: 40 33% 94%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 40 20% 80%;
+    --input: 40 20% 80%;
+    --ring: 42 50% 61%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-ivory-light text-deep-indigo font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F6F1E8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #B9A9A9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5E3B6C;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-warm-gold focus:ring-offset-2 focus:ring-offset-ivory-light;
+}
