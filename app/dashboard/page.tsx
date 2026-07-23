@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
+import { ColorKey } from "@/components/ui/color-key";
 
 // Types
 interface Business {
@@ -523,26 +524,36 @@ export default function Dashboard() {
 
       {/* Dashboard Content */}
       <div className="px-8 pb-8">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={cards.map((c) => c.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-3 gap-6">
-              {cards.map((card) => (
-                <DraggableDashboardCard
-                  key={card.id}
-                  card={card}
-                  onToggle={toggleCard}
-                  onRemove={removeCard}
-                >
-                  {renderCardContent(card)}
-                </DraggableDashboardCard>
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+        <div className="flex gap-6">
+          {/* Main Cards Grid */}
+          <div className="flex-1">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={cards.map((c) => c.id)} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-3 gap-6">
+                  {cards.map((card) => (
+                    <DraggableDashboardCard
+                      key={card.id}
+                      card={card}
+                      onToggle={toggleCard}
+                      onRemove={removeCard}
+                    >
+                      {renderCardContent(card)}
+                    </DraggableDashboardCard>
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+
+          {/* Color Key Sidebar */}
+          <div className="w-80 flex-shrink-0">
+            <ColorKey onAddSegment={() => window.location.href = '/dashboard/segments'} />
+          </div>
+        </div>
 
         {/* Footer */}
         <div className="flex items-center justify-center gap-2 pt-8 pb-4">
