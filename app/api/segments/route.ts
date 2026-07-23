@@ -3,25 +3,28 @@ import { db } from "@/db";
 import { segments, businesses, segmentDimensions, tasks } from "@/db/schema";
 import { eq, and, count, avg, sql } from "drizzle-orm";
 
+
 // GET /api/segments - Get all segments with their stats
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const businessId = searchParams.get("businessId");
 
+    // Build where conditions
+    const whereConditions = [eq(segments.active, true)];
+    
+    if (businessId) {
+      whereConditions.push(eq(segments.businessId, parseInt(businessId)));
+    }
+
     // Base query
-    let query = db.select({
+    const query = db.select({
       segment: segments,
       business: businesses,
     })
     .from(segments)
     .leftJoin(businesses, eq(segments.businessId, businesses.id))
-    .where(eq(segments.active, true));
-
-    // Filter by business if provided
-    if (businessId) {
-      query = query.where(eq(segments.businessId, parseInt(businessId))) as typeof query;
-    }
+    .where(and(...whereConditions));
 
     const segmentList = await query.orderBy(segments.sortOrder);
 
