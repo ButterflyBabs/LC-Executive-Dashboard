@@ -221,7 +221,15 @@ async function seedSegments() {
 
   for (const segment of segmentsData) {
     if (segment.businessId) {
-      await db.insert(segments).values(segment).onConflictDoNothing();
+      await db.insert(segments).values({
+        businessId: segment.businessId,
+        name: segment.name,
+        slug: segment.slug,
+        description: segment.description,
+        icon: segment.icon,
+        color: segment.color,
+        sortOrder: segment.sortOrder,
+      }).onConflictDoNothing();
     }
   }
 
