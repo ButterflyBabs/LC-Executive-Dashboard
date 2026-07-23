@@ -28,11 +28,25 @@ export async function GET(
     const segmentId = segmentResult[0].id;
 
     // Get revenue data
-    const revenue = await db
-      .select()
+    const revenueData = await db
+      .select({
+        id: segmentRevenue.id,
+        period: segmentRevenue.periodStart,
+        actual: segmentRevenue.revenueActual,
+        target: segmentRevenue.revenueTarget,
+        expenses: segmentRevenue.expenses,
+      })
       .from(segmentRevenue)
       .where(eq(segmentRevenue.segmentId, segmentId))
       .orderBy(desc(segmentRevenue.periodStart));
+    
+    // Format period as string
+    const revenue = revenueData.map(r => ({
+      ...r,
+      period: r.period ? new Date(r.period).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '',
+      actual: Number(r.actual) || 0,
+      target: Number(r.target) || 0,
+    }));
 
     return NextResponse.json({ revenue });
   } catch (error) {

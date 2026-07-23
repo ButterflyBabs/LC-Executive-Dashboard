@@ -13,8 +13,18 @@ export async function GET(
 
     const result = await db
       .select({
-        segment: segments,
-        business: businesses,
+        id: segments.id,
+        name: segments.name,
+        slug: segments.slug,
+        description: segments.description,
+        icon: segments.icon,
+        color: segments.color,
+        health: segments.health,
+        revenueTarget: segments.revenueTarget,
+        businessId: segments.businessId,
+        businessName: businesses.name,
+        businessIcon: businesses.icon,
+        businessColor: businesses.color,
       })
       .from(segments)
       .leftJoin(businesses, eq(segments.businessId, businesses.id))
@@ -28,7 +38,18 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ segment: result[0] });
+    // Format the response to match what the frontend expects
+    const segment = {
+      ...result[0],
+      business: {
+        id: result[0].businessId,
+        name: result[0].businessName,
+        icon: result[0].businessIcon,
+        color: result[0].businessColor,
+      }
+    };
+
+    return NextResponse.json({ segment });
   } catch (error) {
     console.error("Error fetching segment:", error);
     return NextResponse.json(

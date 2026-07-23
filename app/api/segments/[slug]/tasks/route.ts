@@ -29,7 +29,13 @@ export async function GET(
 
     // Get tasks
     const taskList = await db
-      .select()
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        status: tasks.status,
+        priority: tasks.priority,
+        dueDate: tasks.dueDate,
+      })
       .from(tasks)
       .where(eq(tasks.segmentId, segmentId))
       .orderBy(tasks.createdAt);

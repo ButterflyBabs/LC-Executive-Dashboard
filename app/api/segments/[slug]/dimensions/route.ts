@@ -29,7 +29,13 @@ export async function GET(
 
     // Get dimension scores
     const dimensions = await db
-      .select()
+      .select({
+        id: segmentDimensions.id,
+        dimension: segmentDimensions.dimensionKey,
+        score: segmentDimensions.score,
+        health: segmentDimensions.health,
+        notes: segmentDimensions.notes,
+      })
       .from(segmentDimensions)
       .where(eq(segmentDimensions.segmentId, segmentId));
 
