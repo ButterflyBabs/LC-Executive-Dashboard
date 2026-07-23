@@ -30,7 +30,7 @@ const navigation = [
   { name: "TASKS", icon: CheckSquare, id: "tasks" },
   { name: "VOICE", icon: Megaphone, id: "voice" },
   { name: "LEARN", icon: PlayCircle, id: "learn" },
-  { name: "EMPIRE", icon: Building2, id: "empire" },
+  { name: "SACRED KALEIDOSCOPE", icon: Building2, id: "sacred-kaleidoscope" },
   { name: "TITANIUM", icon: Puzzle, id: "titanium" },
   { name: "AI", icon: Sparkles, id: "ai" },
 ];
@@ -108,7 +108,7 @@ export default function Dashboard() {
         {/* Brand Tagline */}
         <div className="px-6 py-4">
           <p className="text-[10px] text-white/30 text-center italic font-serif">
-            &ldquo;One dashboard. All businesses.&rdquo;
+            &ldquo;Sacred Kaleidoscope&rdquo;
           </p>
         </div>
 
