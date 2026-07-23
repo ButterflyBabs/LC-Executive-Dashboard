@@ -10,8 +10,26 @@ import {
   ChevronRight,
   Building2,
   Layers,
+  GripVertical,
 } from "lucide-react";
-import { getColorBySlug, getHealthColor, getHealthBgColor, getAccessibleTextColor } from "@/lib/colors";
+import { getHealthColor, getHealthBgColor, getAccessibleTextColor } from "@/lib/colors";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // Types
 interface Business {
@@ -20,6 +38,7 @@ interface Business {
   icon: string;
   color: string;
   slug: string;
+  sortOrder?: number;
 }
 
 interface Segment {
@@ -38,6 +57,202 @@ interface Segment {
     inProgress: number;
   };
   business: Business | null;
+}
+
+// Sortable Business Component
+function SortableBusiness({
+  business,
+  expandedSegments,
+  toggleExpand,
+}: {
+  business: Business & { segments: Segment[] };
+  expandedSegments: Set<number>;
+  toggleExpand: (id: number) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: business.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="bg-white rounded-2xl p-6 soft-shadow"
+    >
+      {/* Business Header with Drag Handle */}
+      <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-2 hover:bg-gray-100 rounded-lg cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="w-5 h-5 text-soft-taupe" />
+        </button>
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
+          style={{ backgroundColor: business.color + "20" }}
+        >
+          {business.icon}
+        </div>
+        <div className="flex-1">
+          <h2 className="text-xl font-serif text-navy">{business.name}</h2>
+          <p className="text-sm text-soft-taupe">
+            {business.segments.length} segment{business.segments.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-soft-taupe">Avg Health:</span>
+          <span className="text-lg font-bold" style={{ color: business.color }}>
+            {business.segments.length > 0
+              ? Math.round(
+                  business.segments.reduce((acc, s) => acc + s.dimensionScore, 0) /
+                    business.segments.length
+                )
+              : 0}
+          </span>
+        </div>
+      </div>
+
+      {/* Segments Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        {business.segments.map((segment) => {
+          const isExpanded = expandedSegments.has(segment.id);
+          const healthColor = getHealthColor(segment.dimensionScore);
+          const healthBg = getHealthBgColor(segment.dimensionScore);
+
+          return (
+            <div
+              key={segment.id}
+              className="rounded-xl border-2 transition-all cursor-pointer overflow-hidden"
+              style={{
+                borderColor: segment.color,
+                backgroundColor: isExpanded ? segment.color + "10" : "white",
+              }}
+              onClick={() => toggleExpand(segment.id)}
+            >
+              {/* Card Header */}
+              <div className="p-4 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
+                    style={{
+                      backgroundColor: segment.color,
+                      color: getAccessibleTextColor(segment.color),
+                    }}
+                  >
+                    {segment.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-navy">{segment.name}</h3>
+                    <p className="text-xs text-soft-taupe line-clamp-1">
+                      {segment.description}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ backgroundColor: healthBg, color: healthColor }}
+                >
+                  {segment.dimensionScore}
+                </div>
+              </div>
+
+              {/* Expanded Content */}
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-gray-100">
+                  {/* Stats Row */}
+                  <div className="grid grid-cols-3 gap-3 my-4">
+                    <div className="text-center p-2 bg-gray-50 rounded-lg">
+                      <p className="text-lg font-bold text-navy">
+                        {segment.tasks.total}
+                      </p>
+                      <p className="text-xs text-soft-taupe">Total Tasks</p>
+                    </div>
+                    <div className="text-center p-2 bg-green-50 rounded-lg">
+                      <p className="text-lg font-bold text-green-600">
+                        {segment.tasks.completed}
+                      </p>
+                      <p className="text-xs text-green-600/70">Completed</p>
+                    </div>
+                    <div className="text-center p-2 bg-blue-50 rounded-lg">
+                      <p className="text-lg font-bold text-blue-600">
+                        {segment.tasks.inProgress}
+                      </p>
+                      <p className="text-xs text-blue-600/70">In Progress</p>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-soft-taupe">Task Progress</span>
+                      <span className="text-navy">
+                        {segment.tasks.total > 0
+                          ? Math.round(
+                              (segment.tasks.completed / segment.tasks.total) * 100
+                            )
+                          : 0}
+                        %
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="h-2 rounded-full transition-all"
+                        style={{
+                          width: `${
+                            segment.tasks.total > 0
+                              ? (segment.tasks.completed / segment.tasks.total) * 100
+                              : 0
+                          }%`,
+                          backgroundColor: segment.color,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <button
+                      className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
+                      style={{
+                        backgroundColor: segment.color,
+                        color: getAccessibleTextColor(segment.color),
+                      }}
+                    >
+                      View Details
+                    </button>
+                    <button className="flex-1 py-2 bg-gray-100 text-navy rounded-lg text-sm font-medium hover:bg-gray-200 transition-all">
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Collapse Indicator */}
+              <div className="px-4 py-2 bg-gray-50 flex items-center justify-center">
+                <ChevronRight
+                  className={`w-5 h-5 text-soft-taupe transition-transform ${
+                    isExpanded ? "rotate-90" : ""
+                  }`}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export default function SegmentsPage() {
@@ -101,10 +316,59 @@ export default function SegmentsPage() {
   };
 
   // Group segments by business
-  const groupedSegments = businesses.map((business) => ({
-    ...business,
-    segments: segments.filter((s) => s.business?.id === business.id),
-  }));
+  const [groupedSegments, setGroupedSegments] = useState<Array<Business & { segments: Segment[] }>>([]);
+
+  useEffect(() => {
+    const grouped = businesses.map((business) => ({
+      ...business,
+      segments: segments.filter((s) => s.business?.id === business.id),
+    }));
+    setGroupedSegments(grouped);
+  }, [businesses, segments]);
+
+  // Sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setGroupedSegments((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        
+        // Update sortOrder for each business
+        newOrder.forEach((business, index) => {
+          business.sortOrder = index + 1;
+        });
+        
+        // Save to database
+        saveBusinessOrder(newOrder);
+        
+        return newOrder;
+      });
+    }
+  };
+
+  const saveBusinessOrder = async (orderedBusinesses: Array<Business & { segments: Segment[] }>) => {
+    try {
+      for (const business of orderedBusinesses) {
+        await fetch(`/api/businesses/${business.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sortOrder: business.sortOrder }),
+        });
+      }
+    } catch (error) {
+      console.error("Error saving business order:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -164,170 +428,33 @@ export default function SegmentsPage() {
         </div>
       </div>
 
-      {/* Segments by Business */}
-      <div className="space-y-8">
-        {groupedSegments.map((business) => {
-          if (selectedBusiness && business.id !== selectedBusiness) return null;
-          if (business.segments.length === 0) return null;
+      {/* Drag and Drop Context */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={groupedSegments.map((b) => b.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {/* Segments by Business */}
+          <div className="space-y-8">
+            {groupedSegments.map((business) => {
+              if (selectedBusiness && business.id !== selectedBusiness) return null;
 
-          return (
-            <div key={business.id} className="bg-white rounded-2xl p-6 soft-shadow">
-              {/* Business Header */}
-              <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
-                  style={{ backgroundColor: business.color + "20" }}
-                >
-                  {business.icon}
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-serif text-navy">{business.name}</h2>
-                  <p className="text-sm text-soft-taupe">
-                    {business.segments.length} segment{business.segments.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-soft-taupe">Avg Health:</span>
-                  <span className="text-lg font-bold" style={{ color: business.color }}>
-                    {Math.round(
-                      business.segments.reduce((acc, s) => acc + s.dimensionScore, 0) /
-                        business.segments.length
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* Segments Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {business.segments.map((segment) => {
-                  const isExpanded = expandedSegments.has(segment.id);
-                  const healthColor = getHealthColor(segment.dimensionScore);
-                  const healthBg = getHealthBgColor(segment.dimensionScore);
-
-                  return (
-                    <div
-                      key={segment.id}
-                      className="rounded-xl border-2 transition-all cursor-pointer overflow-hidden"
-                      style={{
-                        borderColor: segment.color,
-                        backgroundColor: isExpanded ? segment.color + "10" : "white",
-                      }}
-                      onClick={() => toggleExpand(segment.id)}
-                    >
-                      {/* Card Header */}
-                      <div className="p-4 flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
-                            style={{
-                              backgroundColor: segment.color,
-                              color: getAccessibleTextColor(segment.color),
-                            }}
-                          >
-                            {segment.icon}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-navy">{segment.name}</h3>
-                            <p className="text-xs text-soft-taupe line-clamp-1">
-                              {segment.description}
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-                          style={{ backgroundColor: healthBg, color: healthColor }}
-                        >
-                          {segment.dimensionScore}
-                        </div>
-                      </div>
-
-                      {/* Expanded Content */}
-                      {isExpanded && (
-                        <div className="px-4 pb-4 border-t border-gray-100">
-                          {/* Stats Row */}
-                          <div className="grid grid-cols-3 gap-3 my-4">
-                            <div className="text-center p-2 bg-gray-50 rounded-lg">
-                              <p className="text-lg font-bold text-navy">
-                                {segment.tasks.total}
-                              </p>
-                              <p className="text-xs text-soft-taupe">Total Tasks</p>
-                            </div>
-                            <div className="text-center p-2 bg-green-50 rounded-lg">
-                              <p className="text-lg font-bold text-green-600">
-                                {segment.tasks.completed}
-                              </p>
-                              <p className="text-xs text-green-600/70">Completed</p>
-                            </div>
-                            <div className="text-center p-2 bg-blue-50 rounded-lg">
-                              <p className="text-lg font-bold text-blue-600">
-                                {segment.tasks.inProgress}
-                              </p>
-                              <p className="text-xs text-blue-600/70">In Progress</p>
-                            </div>
-                          </div>
-
-                          {/* Progress Bar */}
-                          <div className="mb-4">
-                            <div className="flex justify-between text-sm mb-1">
-                              <span className="text-soft-taupe">Task Progress</span>
-                              <span className="text-navy">
-                                {segment.tasks.total > 0
-                                  ? Math.round(
-                                      (segment.tasks.completed / segment.tasks.total) * 100
-                                    )
-                                  : 0}
-                                %
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div
-                                className="h-2 rounded-full transition-all"
-                                style={{
-                                  width: `${
-                                    segment.tasks.total > 0
-                                      ? (segment.tasks.completed / segment.tasks.total) * 100
-                                      : 0
-                                  }%`,
-                                  backgroundColor: segment.color,
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Actions */}
-                          <div className="flex gap-2">
-                            <button
-                              className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
-                              style={{
-                                backgroundColor: segment.color,
-                                color: getAccessibleTextColor(segment.color),
-                              }}
-                            >
-                              View Details
-                            </button>
-                            <button className="flex-1 py-2 bg-gray-100 text-navy rounded-lg text-sm font-medium hover:bg-gray-200 transition-all">
-                              Edit
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Collapse Indicator */}
-                      <div className="px-4 py-2 bg-gray-50 flex items-center justify-center">
-                        <ChevronRight
-                          className={`w-5 h-5 text-soft-taupe transition-transform ${
-                            isExpanded ? "rotate-90" : ""
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              return (
+                <SortableBusiness
+                  key={business.id}
+                  business={business}
+                  expandedSegments={expandedSegments}
+                  toggleExpand={toggleExpand}
+                />
+              );
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Summary Stats */}
       <div className="mt-8 grid grid-cols-4 gap-6">
