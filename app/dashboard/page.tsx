@@ -273,19 +273,19 @@ export default function Dashboard() {
 
       case "tasks":
         return (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-4">
             {["Today", "In Progress", "Waiting"].map((column) => (
               <div key={column} className="bg-cream-dark/50 rounded-xl p-4">
-                <h4 className="text-xs font-semibold text-soft-taupe uppercase tracking-wider mb-4">
+                <h4 className="text-xs font-semibold text-soft-taupe uppercase tracking-wider mb-3">
                   {column}
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {tasks
                     .filter((t) => t.column === column.toLowerCase().replace(" ", "-"))
                     .map((task) => (
                       <div
                         key={task.id}
-                        className="bg-white p-4 rounded-xl soft-shadow cursor-move hover:shadow-lg transition-all"
+                        className="bg-white p-3 rounded-lg soft-shadow cursor-move hover:shadow-lg transition-all"
                       >
                         <div className="flex items-start gap-3">
                           <div
@@ -297,7 +297,7 @@ export default function Dashboard() {
                                 : "bg-teal"
                             }`}
                           />
-                          <p className="text-sm text-navy/80 leading-relaxed">{task.title}</p>
+                          <p className="text-sm text-navy/80 leading-relaxed line-clamp-2">{task.title}</p>
                         </div>
                       </div>
                     ))}
@@ -337,27 +337,29 @@ export default function Dashboard() {
 
       case "ai-assistant":
         return (
-          <div className="flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-plum to-teal flex items-center justify-center shadow-lg">
-              <Sparkles className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-navy font-medium mb-3 text-lg">Ask me anything...</p>
-              <div className="flex gap-3">
-                <button className="px-4 py-2 bg-cream-dark/50 text-navy/60 rounded-full text-sm hover:bg-lavender/50 hover:text-navy transition-all">
-                  What&apos;s my focus today?
-                </button>
-                <button className="px-4 py-2 bg-cream-dark/50 text-navy/60 rounded-full text-sm hover:bg-lavender/50 hover:text-navy transition-all">
-                  Schedule focus time
-                </button>
-                <button className="px-4 py-2 bg-cream-dark/50 text-navy/60 rounded-full text-sm hover:bg-lavender/50 hover:text-navy transition-all">
-                  Draft email to team
-                </button>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-plum to-teal flex items-center justify-center shadow-lg flex-shrink-0">
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-navy font-medium text-lg truncate">Ask me anything...</p>
+              </div>
+              <button className="w-12 h-12 rounded-2xl bg-gold flex items-center justify-center hover:bg-gold-light transition-all shadow-glow flex-shrink-0">
+                <Mic className="w-5 h-5 text-navy" />
+              </button>
             </div>
-            <button className="w-14 h-14 rounded-2xl bg-gold flex items-center justify-center hover:bg-gold-light transition-all shadow-glow">
-              <Mic className="w-6 h-6 text-navy" />
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button className="px-3 py-2 bg-cream-dark/50 text-navy/60 rounded-full text-sm hover:bg-lavender/50 hover:text-navy transition-all whitespace-nowrap">
+                What&apos;s my focus today?
+              </button>
+              <button className="px-3 py-2 bg-cream-dark/50 text-navy/60 rounded-full text-sm hover:bg-lavender/50 hover:text-navy transition-all whitespace-nowrap">
+                Schedule focus time
+              </button>
+              <button className="px-3 py-2 bg-cream-dark/50 text-navy/60 rounded-full text-sm hover:bg-lavender/50 hover:text-navy transition-all whitespace-nowrap">
+                Draft email to team
+              </button>
+            </div>
           </div>
         );
 
