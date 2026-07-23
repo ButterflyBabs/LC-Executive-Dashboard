@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 40 33% 94%;
+    --background: 40 33% 96%;
     --foreground: 222 50% 24%;
     --card: 0 0% 100%;
     --card-foreground: 222 50% 24%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 50% 24%;
     --primary: 222 50% 24%;
-    --primary-foreground: 40 33% 94%;
+    --primary-foreground: 40 33% 96%;
     --secondary: 280 28% 33%;
-    --secondary-foreground: 40 33% 94%;
-    --muted: 40 20% 90%;
+    --secondary-foreground: 40 33% 96%;
+    --muted: 40 20% 92%;
     --muted-foreground: 222 20% 40%;
     --accent: 184 48% 34%;
-    --accent-foreground: 40 33% 94%;
+    --accent-foreground: 40 33% 96%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 40 20% 80%;
-    --input: 40 20% 80%;
+    --border: 40 15% 85%;
+    --input: 40 15% 85%;
     --ring: 42 50% 61%;
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 }
 
@@ -32,7 +32,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-ivory-light text-deep-indigo font-sans antialiased;
+    @apply bg-[#F8F5F0] text-[#1a2b4a] font-sans antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
@@ -41,21 +41,21 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F6F1E8;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #B9A9A9;
-  border-radius: 4px;
+  background: #c4b792;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #5E3B6C;
+  background: #1a2b4a;
 }
 
 /* Smooth transitions */
@@ -65,7 +65,32 @@
   transition-duration: 300ms;
 }
 
+/* Card hover effect */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+}
+
+/* Glass effect for AI bar */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #1a2b4a 0%, #4a6fa5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Soft shadow */
+.soft-shadow {
+  box-shadow: 0 4px 20px rgba(26, 43, 74, 0.08);
+}
+
 /* Focus styles */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-warm-gold focus:ring-offset-2 focus:ring-offset-ivory-light;
+  @apply focus:outline-none focus:ring-2 focus:ring-[#d4af63] focus:ring-offset-2 focus:ring-offset-[#F8F5F0];
 }
