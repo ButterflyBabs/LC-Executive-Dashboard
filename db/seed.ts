@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { businesses, tasks, dimensionHealth } from "./schema";
+import { businesses, tasks, segmentDimensions, segments } from "./schema";
 
 // Seed data for businesses
 const businessesData = [
@@ -70,15 +70,17 @@ async function seed() {
     await db.insert(businesses).values(business).onConflictDoNothing();
   }
 
-  // Seed dimension health scores for each business
-  console.log("Seeding dimension health scores...");
-  const allBusinesses = await db.select().from(businesses);
+  // Get all segments
+  const allSegments = await db.select().from(segments);
   
-  for (const business of allBusinesses) {
+  // Seed dimension health scores for each segment
+  console.log("Seeding dimension health scores...");
+  
+  for (const segment of allSegments) {
     for (const dimension of dimensionsList) {
-      await db.insert(dimensionHealth).values({
-        dimension,
-        businessId: business.id,
+      await db.insert(segmentDimensions).values({
+        dimensionKey: dimension,
+        segmentId: segment.id,
         score: Math.floor(Math.random() * 30) + 70, // Random score between 70-100
         health: "healthy",
       }).onConflictDoNothing();
