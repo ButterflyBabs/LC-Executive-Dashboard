@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { businesses, tasks, dimensionHealth } from "@/db/schema";
+import { businesses, tasks, segments, segmentDimensions } from "@/db/schema";
 import { eq, and, count, avg, sql } from "drizzle-orm";
 
 // GET /api/sacred-kaleidoscope - Get business portfolio overview
@@ -20,14 +20,15 @@ export async function GET(request: NextRequest) {
       .from(tasks)
       .groupBy(tasks.businessId);
 
-    // Get average dimension scores per business
+    // Get average dimension scores per business (aggregated from segments)
     const dimensionScores = await db
       .select({
-        businessId: dimensionHealth.businessId,
-        avgScore: avg(dimensionHealth.score),
+        businessId: segments.businessId,
+        avgScore: avg(segmentDimensions.score),
       })
-      .from(dimensionHealth)
-      .groupBy(dimensionHealth.businessId);
+      .from(segmentDimensions)
+      .innerJoin(segments, eq(segmentDimensions.segmentId, segments.id))
+      .groupBy(segments.businessId);
 
     // Combine data
     const portfolioData = allBusinesses.map((business) => {
