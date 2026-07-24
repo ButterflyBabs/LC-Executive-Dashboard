@@ -237,18 +237,24 @@ export default function SegmentDetailPage() {
             <p className="text-soft-taupe max-w-2xl">{segment?.description || ''}</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3" style={{zIndex: 100}}>
           <button 
-            onClick={() => setShowHealthWizard(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white"
+            onClick={() => {
+              console.log('Health Check clicked');
+              setShowHealthWizard(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white shadow-md"
             type="button"
           >
             <Activity className="w-4 h-4" />
             Health Check
           </button>
           <button 
-            onClick={autoCalculateHealth}
-            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white"
+            onClick={() => {
+              console.log('Auto-Calculate clicked');
+              autoCalculateHealth();
+            }}
+            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white shadow-md"
             type="button"
           >
             <RefreshCw className="w-4 h-4" />
