@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Plus,
   TrendingUp,
@@ -11,6 +12,7 @@ import {
   Building2,
   Layers,
   GripVertical,
+  ArrowRight,
 } from "lucide-react";
 import { getHealthColor, getHealthBgColor, getAccessibleTextColor } from "@/lib/colors";
 import {
@@ -142,7 +144,7 @@ function SortableBusiness({
               onClick={() => toggleExpand(segment.id)}
             >
               {/* Card Header */}
-              <div className="p-4 flex items-start justify-between">
+              <Link href={`/dashboard/segments/${segment.slug}`} className="block p-4 flex items-start justify-between hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
@@ -166,7 +168,7 @@ function SortableBusiness({
                 >
                   {segment.dimensionScore}
                 </div>
-              </div>
+              </Link>
 
               {/* Expanded Content */}
               {isExpanded && (
@@ -223,15 +225,16 @@ function SortableBusiness({
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button
-                      className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
+                    <Link
+                      href={`/dashboard/segments/${segment.slug}`}
+                      className="flex-1 py-2 rounded-lg text-sm font-medium transition-all text-center"
                       style={{
                         backgroundColor: segment.color,
                         color: getAccessibleTextColor(segment.color),
                       }}
                     >
                       View Details
-                    </button>
+                    </Link>
                     <button className="flex-1 py-2 bg-gray-100 text-navy rounded-lg text-sm font-medium hover:bg-gray-200 transition-all">
                       Edit
                     </button>
