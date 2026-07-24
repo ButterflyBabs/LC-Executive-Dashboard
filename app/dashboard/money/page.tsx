@@ -124,6 +124,58 @@ const categories = [
   { id: "expense", name: "Expenses", items: ["Software", "Hosting", "Marketing", "Contractors", "Office", "Travel", "Professional Services", "Taxes"] },
 ];
 
+// Revenue Watcher Data
+const revenueData: Record<string, any[]> = {
+  day: [
+    { label: "12am", date: "12a", income: 0, expense: 0, net: 0, isCurrent: false },
+    { label: "4am", date: "4a", income: 0, expense: 0, net: 0, isCurrent: false },
+    { label: "8am", date: "8a", income: 297, expense: 0, net: 297, isCurrent: false },
+    { label: "12pm", date: "12p", income: 450, expense: 120, net: 330, isCurrent: false },
+    { label: "4pm", date: "4p", income: 750, expense: 0, net: 750, isCurrent: true },
+    { label: "8pm", date: "8p", income: 0, expense: 0, net: 0, isCurrent: false },
+    { label: "11pm", date: "11p", income: 0, expense: 0, net: 0, isCurrent: false },
+  ],
+  week: [
+    { label: "Mon", date: "21", income: 450, expense: 120, net: 330, isCurrent: false },
+    { label: "Tue", date: "22", income: 0, expense: 297, net: -297, isCurrent: false },
+    { label: "Wed", date: "23", income: 1200, expense: 45, net: 1155, isCurrent: false },
+    { label: "Thu", date: "24", income: 1497, expense: 20, net: 1477, isCurrent: true },
+    { label: "Fri", date: "25", income: 0, expense: 0, net: 0, isCurrent: false },
+    { label: "Sat", date: "26", income: 0, expense: 0, net: 0, isCurrent: false },
+    { label: "Sun", date: "27", income: 0, expense: 0, net: 0, isCurrent: false },
+  ],
+  month: [
+    { label: "Week 1", date: "1-7", income: 3200, expense: 850, net: 2350, isCurrent: false },
+    { label: "Week 2", date: "8-14", income: 4800, expense: 1200, net: 3600, isCurrent: false },
+    { label: "Week 3", date: "15-21", income: 5100, expense: 980, net: 4120, isCurrent: false },
+    { label: "Week 4", date: "22-31", income: 3147, expense: 482, net: 2665, isCurrent: true },
+  ],
+  quarter: [
+    { label: "July", date: "Jul", income: 16247, expense: 3512, net: 12735, isCurrent: true },
+    { label: "August", date: "Aug", income: 18500, expense: 4200, net: 14300, isCurrent: false },
+    { label: "September", date: "Sep", income: 17200, expense: 3800, net: 13400, isCurrent: false },
+  ],
+  semi: [
+    { label: "Q3", date: "Q3", income: 51947, expense: 11512, net: 40435, isCurrent: true },
+    { label: "Q4", date: "Q4", income: 48500, expense: 10800, net: 37700, isCurrent: false },
+  ],
+  year: [
+    { label: "Q1", date: "Q1", income: 42000, expense: 9500, net: 32500, isCurrent: false },
+    { label: "Q2", date: "Q2", income: 46500, expense: 10200, net: 36300, isCurrent: false },
+    { label: "Q3", date: "Q3", income: 51947, expense: 11512, net: 40435, isCurrent: true },
+    { label: "Q4", date: "Q4", income: 48500, expense: 10800, net: 37700, isCurrent: false },
+  ],
+};
+
+const periodTotals: Record<string, any> = {
+  day: { income: 1497, expense: 482, net: 1015, avgIncome: 62.38, avgExpense: 20.08, avgNet: 42.29 },
+  week: { income: 3147, expense: 482, net: 2665, avgIncome: 449.57, avgExpense: 68.86, avgNet: 380.71 },
+  month: { income: 16247, expense: 3512, net: 12735, avgIncome: 541.57, avgExpense: 117.07, avgNet: 424.50 },
+  quarter: { income: 51947, expense: 11512, net: 40435, avgIncome: 17315.67, avgExpense: 3837.33, avgNet: 13478.33 },
+  semi: { income: 100447, expense: 22312, net: 78135, avgIncome: 16741.17, avgExpense: 3718.67, avgNet: 13022.50 },
+  year: { income: 188947, expense: 42012, net: 146935, avgIncome: 15745.58, avgExpense: 3501.00, avgNet: 12244.58 },
+};
+
 export default function MoneyPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "transactions" | "subscriptions" | "pnl" | "upload">("overview");
   const [accounts, setAccounts] = useState<FinancialAccount[]>(mockAccounts);
@@ -134,6 +186,7 @@ export default function MoneyPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<"weekly" | "monthly" | "quarterly" | "semi-annual" | "annual">("monthly");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [revenuePeriod, setRevenuePeriod] = useState<"day" | "week" | "month" | "quarter" | "semi" | "year">("week");
 
   // Calculate totals
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
@@ -285,7 +338,7 @@ export default function MoneyPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-lg font-semibold text-navy">Revenue Watcher</h3>
-                <p className="text-sm text-soft-taupe">Daily breakdown of income and expenses</p>
+                <p className="text-sm text-soft-taupe">Track income and expenses across time periods</p>
               </div>
               <div className="flex items-center gap-2">
                 {[
@@ -298,7 +351,12 @@ export default function MoneyPage() {
                 ].map((period) => (
                   <button
                     key={period.id}
-                    className="px-3 py-1.5 text-sm rounded-lg bg-navy/5 text-navy hover:bg-navy/10 transition-colors"
+                    onClick={() => setRevenuePeriod(period.id as any)}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                      revenuePeriod === period.id
+                        ? "bg-navy text-white"
+                        : "bg-navy/5 text-navy hover:bg-navy/10"
+                    }`}
                   >
                     {period.label}
                   </button>
@@ -306,43 +364,42 @@ export default function MoneyPage() {
               </div>
             </div>
 
-            {/* Daily Breakdown Grid */}
-            <div className="grid grid-cols-7 gap-3">
-              {[
-                { day: "Mon", date: "21", income: 450, expense: 120 },
-                { day: "Tue", date: "22", income: 0, expense: 297 },
-                { day: "Wed", date: "23", income: 1200, expense: 45 },
-                { day: "Thu", date: "24", income: 297, expense: 20 },
-                { day: "Fri", date: "25", income: 0, expense: 0 },
-                { day: "Sat", date: "26", income: 0, expense: 0 },
-                { day: "Sun", date: "27", income: 0, expense: 0 },
-              ].map((day, idx) => (
+            {/* Dynamic Breakdown Grid Based on Period */}
+            <div className={`grid gap-3 ${
+              revenuePeriod === "day" ? "grid-cols-7" :
+              revenuePeriod === "week" ? "grid-cols-7" :
+              revenuePeriod === "month" ? "grid-cols-7" :
+              revenuePeriod === "quarter" ? "grid-cols-3" :
+              revenuePeriod === "semi" ? "grid-cols-3" :
+              "grid-cols-4"
+            }`}>
+              {revenueData[revenuePeriod].map((item: any, idx: number) => (
                 <div
                   key={idx}
                   className={`p-4 rounded-xl border-2 ${
-                    day.date === "24" ? "border-gold bg-gold/5" : "border-gray-100"
-                  }`}
+                    item.isCurrent ? "border-gold bg-gold/5" : "border-gray-100 hover:border-gray-200"
+                  } transition-colors cursor-pointer`}
                 >
-                  <p className="text-xs text-soft-taupe text-center">{day.day}</p>
-                  <p className="text-lg font-bold text-navy text-center mb-3">{day.date}</p>
+                  <p className="text-xs text-soft-taupe text-center">{item.label}</p>
+                  <p className="text-lg font-bold text-navy text-center mb-3">{item.date}</p>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-green-600">In</span>
                       <span className="text-sm font-medium text-green-600">
-                        {day.income > 0 ? formatCurrency(day.income) : "-"}
+                        {item.income > 0 ? formatCurrency(item.income) : "-"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-red-600">Out</span>
                       <span className="text-sm font-medium text-red-600">
-                        {day.expense > 0 ? formatCurrency(day.expense) : "-"}
+                        {item.expense > 0 ? formatCurrency(item.expense) : "-"}
                       </span>
                     </div>
                     <div className="pt-2 border-t border-gray-100">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-navy">Net</span>
-                        <span className={`text-sm font-bold ${day.income - day.expense >= 0 ? "text-green-600" : "text-red-600"}`}>
-                          {formatCurrency(day.income - day.expense)}
+                        <span className={`text-sm font-bold ${item.net >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          {formatCurrency(item.net)}
                         </span>
                       </div>
                     </div>
@@ -354,32 +411,47 @@ export default function MoneyPage() {
             {/* Period Totals */}
             <div className="grid grid-cols-3 gap-6 mt-6 pt-6 border-t border-gray-200">
               <div className="text-center">
-                <p className="text-sm text-soft-taupe mb-1">Period Income</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(1947)}</p>
+                <p className="text-sm text-soft-taupe mb-1">{revenuePeriod === "day" ? "Today's Income" : "Period Income"}</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(periodTotals[revenuePeriod].income)}</p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-soft-taupe mb-1">Period Expenses</p>
-                <p className="text-2xl font-bold text-red-600">{formatCurrency(482)}</p>
+                <p className="text-sm text-soft-taupe mb-1">{revenuePeriod === "day" ? "Today's Expenses" : "Period Expenses"}</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(periodTotals[revenuePeriod].expense)}</p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-soft-taupe mb-1">Net for Period</p>
-                <p className="text-2xl font-bold text-navy">{formatCurrency(1465)}</p>
+                <p className="text-sm text-soft-taupe mb-1">{revenuePeriod === "day" ? "Net for Today" : "Net for Period"}</p>
+                <p className="text-2xl font-bold text-navy">{formatCurrency(periodTotals[revenuePeriod].net)}</p>
               </div>
             </div>
 
-            {/* Daily Average */}
+            {/* Daily/Period Average */}
             <div className="flex items-center justify-center gap-8 mt-6 pt-6 border-t border-gray-200">
               <div className="text-center">
-                <p className="text-sm text-soft-taupe mb-1">Daily Avg Income</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(278.14)}</p>
+                <p className="text-sm text-soft-taupe mb-1">
+                  {revenuePeriod === "day" ? "Hourly Avg Income" :
+                   revenuePeriod === "week" ? "Daily Avg Income" :
+                   revenuePeriod === "month" ? "Daily Avg Income" :
+                   "Monthly Avg Income"}
+                </p>
+                <p className="text-xl font-bold text-green-600">{formatCurrency(periodTotals[revenuePeriod].avgIncome)}</p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-soft-taupe mb-1">Daily Avg Expense</p>
-                <p className="text-xl font-bold text-red-600">{formatCurrency(68.86)}</p>
+                <p className="text-sm text-soft-taupe mb-1">
+                  {revenuePeriod === "day" ? "Hourly Avg Expense" :
+                   revenuePeriod === "week" ? "Daily Avg Expense" :
+                   revenuePeriod === "month" ? "Daily Avg Expense" :
+                   "Monthly Avg Expense"}
+                </p>
+                <p className="text-xl font-bold text-red-600">{formatCurrency(periodTotals[revenuePeriod].avgExpense)}</p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-soft-taupe mb-1">Daily Avg Net</p>
-                <p className="text-xl font-bold text-navy">{formatCurrency(209.29)}</p>
+                <p className="text-sm text-soft-taupe mb-1">
+                  {revenuePeriod === "day" ? "Hourly Avg Net" :
+                   revenuePeriod === "week" ? "Daily Avg Net" :
+                   revenuePeriod === "month" ? "Daily Avg Net" :
+                   "Monthly Avg Net"}
+                </p>
+                <p className="text-xl font-bold text-navy">{formatCurrency(periodTotals[revenuePeriod].avgNet)}</p>
               </div>
             </div>
           </div>
