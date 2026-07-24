@@ -32,6 +32,10 @@ import {
   Target,
   ArrowUpRight,
   ArrowDownRight,
+  Users,
+  Briefcase,
+  UserCheck,
+  TrendingUp as TrendingUpIcon,
 } from "lucide-react";
 
 // Types
@@ -124,6 +128,96 @@ const categories = [
   { id: "expense", name: "Expenses", items: ["Software", "Hosting", "Marketing", "Contractors", "Office", "Travel", "Professional Services", "Taxes"] },
 ];
 
+// Human Capital Types
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  type: "employee" | "contractor" | "va";
+  hourlyRate: number;
+  hoursPerWeek: number;
+  monthlyCost: number;
+  startDate: Date;
+  status: "active" | "inactive";
+  avatar?: string;
+  revenueGenerating: boolean;
+  assignedSegments: string[];
+  tasksCompleted: number;
+  revenueAttributed: number;
+}
+
+const mockTeamMembers: TeamMember[] = [
+  {
+    id: "1",
+    name: "Aira",
+    role: "Virtual Assistant - Content & Admin",
+    type: "va",
+    hourlyRate: 25,
+    hoursPerWeek: 20,
+    monthlyCost: 2000,
+    startDate: new Date("2024-01-15"),
+    status: "active",
+    revenueGenerating: true,
+    assignedSegments: ["LifeCharter Core", "Content"],
+    tasksCompleted: 156,
+    revenueAttributed: 15000,
+  },
+  {
+    id: "2",
+    name: "Sarah Johnson",
+    role: "Community Manager",
+    type: "contractor",
+    hourlyRate: 35,
+    hoursPerWeek: 15,
+    monthlyCost: 2100,
+    startDate: new Date("2024-03-01"),
+    status: "active",
+    revenueGenerating: true,
+    assignedSegments: ["LifeCharter Circle", "Community"],
+    tasksCompleted: 89,
+    revenueAttributed: 8500,
+  },
+  {
+    id: "3",
+    name: "Michael Chen",
+    role: "Tech Developer",
+    type: "contractor",
+    hourlyRate: 75,
+    hoursPerWeek: 10,
+    monthlyCost: 3000,
+    startDate: new Date("2024-02-01"),
+    status: "active",
+    revenueGenerating: false,
+    assignedSegments: ["Command Suite", "Systems"],
+    tasksCompleted: 45,
+    revenueAttributed: 0,
+  },
+  {
+    id: "4",
+    name: "Jessica Williams",
+    role: "Marketing Specialist",
+    type: "employee",
+    hourlyRate: 30,
+    hoursPerWeek: 40,
+    monthlyCost: 4800,
+    startDate: new Date("2024-01-01"),
+    status: "active",
+    revenueGenerating: true,
+    assignedSegments: ["Marketing", "Sales"],
+    tasksCompleted: 203,
+    revenueAttributed: 28000,
+  },
+];
+
+const humanCapitalMetrics = {
+  totalMonthlyCost: mockTeamMembers.reduce((sum, m) => sum + m.monthlyCost, 0),
+  revenueGeneratingCost: mockTeamMembers.filter(m => m.revenueGenerating).reduce((sum, m) => sum + m.monthlyCost, 0),
+  nonRevenueCost: mockTeamMembers.filter(m => !m.revenueGenerating).reduce((sum, m) => sum + m.monthlyCost, 0),
+  totalRevenueAttributed: mockTeamMembers.reduce((sum, m) => sum + m.revenueAttributed, 0),
+  avgROI: 4.2,
+  headcount: mockTeamMembers.length,
+};
+
 // Revenue Watcher Data
 const revenueData: Record<string, any[]> = {
   day: [
@@ -177,7 +271,7 @@ const periodTotals: Record<string, any> = {
 };
 
 export default function MoneyPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "transactions" | "subscriptions" | "pnl" | "upload">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "transactions" | "subscriptions" | "human-capital" | "pnl" | "upload">("overview");
   const [accounts, setAccounts] = useState<FinancialAccount[]>(mockAccounts);
   const [subscriptions, setSubscriptions] = useState<TechSubscription[]>(mockSubscriptions);
   const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
@@ -246,6 +340,7 @@ export default function MoneyPage() {
           { id: "overview", label: "Overview", icon: PieChart },
           { id: "transactions", label: "Transactions", icon: Receipt },
           { id: "subscriptions", label: "Tech Stack", icon: CreditCard },
+          { id: "human-capital", label: "Human Capital", icon: Users },
           { id: "pnl", label: "P&L Reports", icon: BarChart3 },
         ].map((tab) => (
           <button
@@ -696,6 +791,196 @@ export default function MoneyPage() {
                         <button className="p-2 hover:bg-gray-100 rounded-lg">
                           <MoreHorizontal className="w-4 h-4 text-soft-taupe" />
                         </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HUMAN CAPITAL TAB */}
+      {activeTab === "human-capital" && (
+        <div className="space-y-6">
+          {/* Human Capital Overview */}
+          <div className="grid grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl p-6 soft-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-soft-taupe">Total Team Cost</p>
+                  <p className="text-2xl font-bold text-navy">{formatCurrency(humanCapitalMetrics.totalMonthlyCost)}/mo</p>
+                </div>
+              </div>
+              <p className="text-sm text-soft-taupe">{humanCapitalMetrics.headcount} active members</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 soft-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                  <TrendingUpIcon className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-soft-taupe">Revenue Generating</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(humanCapitalMetrics.revenueGeneratingCost)}/mo</p>
+                </div>
+              </div>
+              <p className="text-sm text-green-600">{Math.round((humanCapitalMetrics.revenueGeneratingCost / humanCapitalMetrics.totalMonthlyCost) * 100)}% of payroll</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 soft-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                  <Briefcase className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-soft-taupe">Support/Operations</p>
+                  <p className="text-2xl font-bold text-orange-600">{formatCurrency(humanCapitalMetrics.nonRevenueCost)}/mo</p>
+                </div>
+              </div>
+              <p className="text-sm text-orange-600">{Math.round((humanCapitalMetrics.nonRevenueCost / humanCapitalMetrics.totalMonthlyCost) * 100)}% of payroll</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 soft-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                  <Target className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-soft-taupe">Team ROI</p>
+                  <p className="text-2xl font-bold text-purple-600">{humanCapitalMetrics.avgROI}x</p>
+                </div>
+              </div>
+              <p className="text-sm text-purple-600">Revenue per $1 spent</p>
+            </div>
+          </div>
+
+          {/* Team Members List */}
+          <div className="bg-white rounded-2xl soft-shadow">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-navy">Team Members & Value Analysis</h3>
+              <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl">
+                <Plus className="w-4 h-4" />
+                Add Team Member
+              </button>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {mockTeamMembers.map((member) => {
+                const roi = member.revenueAttributed / member.monthlyCost;
+                const isProfitable = roi >= 1;
+                return (
+                  <div key={member.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-full bg-navy/10 flex items-center justify-center text-navy font-bold text-lg">
+                          {member.name[0]}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-navy">{member.name}</p>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              member.revenueGenerating ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
+                            }`}>
+                              {member.revenueGenerating ? "Revenue Generating" : "Support/Operations"}
+                            </span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              member.type === "employee" ? "bg-blue-100 text-blue-700" :
+                              member.type === "contractor" ? "bg-purple-100 text-purple-700" :
+                              "bg-gray-100 text-gray-700"
+                            }`}>
+                              {member.type === "va" ? "VA" : member.type}
+                            </span>
+                          </div>
+                          <p className="text-sm text-soft-taupe">{member.role}</p>
+                          <div className="flex items-center gap-4 mt-2 text-sm">
+                            <span className="text-soft-taupe">{member.hoursPerWeek} hrs/week</span>
+                            <span className="text-soft-taupe">${member.hourlyRate}/hr</span>
+                            <span className="text-soft-taupe">Started {member.startDate.toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {member.assignedSegments.map((segment) => (
+                              <span key={segment} className="text-xs px-2 py-1 bg-cream-dark rounded-full text-navy/70">
+                                {segment}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="grid grid-cols-3 gap-6">
+                          <div className="text-center">
+                            <p className="text-sm text-soft-taupe">Monthly Cost</p>
+                            <p className="font-semibold text-navy">{formatCurrency(member.monthlyCost)}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm text-soft-taupe">Revenue Attributed</p>
+                            <p className={`font-semibold ${member.revenueAttributed > 0 ? "text-green-600" : "text-soft-taupe"}`}>
+                              {formatCurrency(member.revenueAttributed)}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm text-soft-taupe">ROI</p>
+                            <p className={`font-semibold ${isProfitable ? "text-green-600" : "text-red-600"}`}>
+                              {roi.toFixed(1)}x
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center justify-end gap-2">
+                          <span className="text-xs text-soft-taupe">{member.tasksCompleted} tasks completed</span>
+                          <button className="p-2 hover:bg-gray-100 rounded-lg">
+                            <MoreHorizontal className="w-4 h-4 text-soft-taupe" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Value Analysis Chart */}
+          <div className="bg-white rounded-2xl p-6 soft-shadow">
+            <h3 className="text-lg font-semibold text-navy mb-6">Value Analysis: Revenue vs Cost</h3>
+            <div className="space-y-4">
+              {mockTeamMembers.map((member) => {
+                const roi = member.revenueAttributed / member.monthlyCost;
+                const costWidth = Math.min((member.monthlyCost / 5000) * 100, 100);
+                const revenueWidth = Math.min((member.revenueAttributed / 30000) * 100, 100);
+                return (
+                  <div key={member.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-navy">{member.name}</span>
+                      <span className={`text-sm font-semibold ${roi >= 1 ? "text-green-600" : "text-red-600"}`}>
+                        ROI: {roi.toFixed(1)}x
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs text-soft-taupe w-16">Cost</span>
+                          <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-orange-400 rounded-full"
+                              style={{ width: `${costWidth}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-navy w-16 text-right">{formatCurrency(member.monthlyCost)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-soft-taupe w-16">Revenue</span>
+                          <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-green-500 rounded-full"
+                              style={{ width: `${revenueWidth}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-navy w-16 text-right">{formatCurrency(member.revenueAttributed)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
