@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, TrendingUp, Save, Target, Users, DollarSign, Pipeline } from "lucide-react";
+import { ArrowLeft, TrendingUp, Save, Target, Users, DollarSign, GitBranch } from "lucide-react";
 
 export default function SalesPlanPage() {
   const [activeTab, setActiveTab] = useState("pipeline");
 
   const tabs = [
-    { id: "pipeline", name: "Pipeline", icon: Pipeline },
+    { id: "pipeline", name: "Pipeline", icon: GitBranch },
     { id: "targets", name: "Targets", icon: Target },
     { id: "process", name: "Sales Process", icon: Users },
     { id: "forecast", name: "Forecast", icon: TrendingUp },
