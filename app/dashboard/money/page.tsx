@@ -311,6 +311,17 @@ export default function MoneyPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<"weekly" | "monthly" | "quarterly" | "semi-annual" | "annual">("monthly");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [revenuePeriod, setRevenuePeriod] = useState<"day" | "week" | "month" | "quarter" | "semi" | "year">("week");
+  const [humanCapitalPeriod, setHumanCapitalPeriod] = useState<"day" | "week" | "month" | "quarter" | "semi" | "year">("month");
+  
+  // Multipliers to convert monthly values to different time periods
+  const humanCapitalMultipliers: Record<string, number> = {
+    day: 1 / 30,      // Daily cost/revenue (monthly ÷ 30)
+    week: 1 / 4.33,   // Weekly cost/revenue (monthly ÷ 4.33)
+    month: 1,         // Monthly (baseline)
+    quarter: 3,       // Quarterly (monthly × 3)
+    semi: 6,          // Semi-annual (monthly × 6)
+    year: 12,         // Annual (monthly × 12)
+  };
 
   // Calculate totals
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
@@ -1001,12 +1012,41 @@ export default function MoneyPage() {
 
           {/* Value Analysis Chart */}
           <div className="bg-white rounded-2xl p-6 soft-shadow">
-            <h3 className="text-lg font-semibold text-navy mb-6">Value Analysis: Revenue vs Cost</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-navy">Value Analysis: Revenue vs Cost</h3>
+              <div className="flex items-center gap-2">
+                {[
+                  { id: "day", label: "Day" },
+                  { id: "week", label: "Week" },
+                  { id: "month", label: "Month" },
+                  { id: "quarter", label: "Quarter" },
+                  { id: "semi", label: "6 Mo" },
+                  { id: "year", label: "Year" },
+                ].map((period) => (
+                  <button
+                    key={period.id}
+                    onClick={() => setHumanCapitalPeriod(period.id as any)}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                      humanCapitalPeriod === period.id
+                        ? "bg-navy text-white"
+                        : "bg-navy/5 text-navy hover:bg-navy/10"
+                    }`}
+                  >
+                    {period.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="space-y-4">
               {mockTeamMembers.map((member) => {
-                const roi = member.revenueAttributed / member.monthlyCost;
-                const costWidth = Math.min((member.monthlyCost / 5000) * 100, 100);
-                const revenueWidth = Math.min((member.revenueAttributed / 30000) * 100, 100);
+                const multiplier = humanCapitalMultipliers[humanCapitalPeriod];
+                const adjustedCost = member.monthlyCost * multiplier;
+                const adjustedRevenue = member.revenueAttributed * multiplier;
+                const roi = adjustedRevenue / adjustedCost;
+                const maxCost = 5000 * multiplier;
+                const maxRevenue = 30000 * multiplier;
+                const costWidth = Math.min((adjustedCost / maxCost) * 100, 100);
+                const revenueWidth = Math.min((adjustedRevenue / maxRevenue) * 100, 100);
                 return (
                   <div key={member.id} className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -1025,7 +1065,7 @@ export default function MoneyPage() {
                               style={{ width: `${costWidth}%` }}
                             />
                           </div>
-                          <span className="text-xs text-navy w-16 text-right">{formatCurrency(member.monthlyCost)}</span>
+                          <span className="text-xs text-navy w-20 text-right">{formatCurrency(adjustedCost)}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-soft-taupe w-16">Revenue</span>
@@ -1035,7 +1075,7 @@ export default function MoneyPage() {
                               style={{ width: `${revenueWidth}%` }}
                             />
                           </div>
-                          <span className="text-xs text-navy w-16 text-right">{formatCurrency(member.revenueAttributed)}</span>
+                          <span className="text-xs text-navy w-20 text-right">{formatCurrency(adjustedRevenue)}</span>
                         </div>
                       </div>
                     </div>
