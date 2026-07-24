@@ -363,30 +363,73 @@ export default function Dashboard() {
       case "financial":
         return (
           <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <span className="text-3xl font-serif text-gold-dark">$24,580</span>
-                <p className="text-sm text-soft-taupe">Total Month to Date</p>
+            {/* Main Financial Metrics */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="bg-green-50 rounded-xl p-4">
+                <p className="text-xs text-green-600 mb-1">Today's Income</p>
+                <p className="text-2xl font-bold text-green-700">$1,497</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <TrendingUp className="w-3 h-3 text-green-600" />
+                  <span className="text-xs text-green-600">+23% vs yesterday</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-teal">
-                <TrendingUp className="w-5 h-5" />
-                <span className="font-medium">+12%</span>
+              <div className="bg-red-50 rounded-xl p-4">
+                <p className="text-xs text-red-600 mb-1">Today's Expenses</p>
+                <p className="text-2xl font-bold text-red-700">$482</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <TrendingUp className="w-3 h-3 text-red-600 rotate-180" />
+                  <span className="text-xs text-red-600">+5% vs yesterday</span>
+                </div>
               </div>
             </div>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {segments.map((segment) => {
-                const items = segmentItems[segment.id] || [];
-                const revenueItem = items.find((i: any) => i.icon === DollarSign);
-                if (!revenueItem) return null;
-                return (
-                  <SegmentItem key={segment.id} segment={segment}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-navy/70">Revenue</span>
-                      <span className="font-semibold text-gold">{revenueItem.text.replace('$', '')}</span>
-                    </div>
-                  </SegmentItem>
-                );
-              })}
+
+            {/* Net & Period Summary */}
+            <div className="bg-gold/10 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-navy/70">Net for Today</p>
+                  <p className="text-3xl font-serif text-navy">$1,015</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-soft-taupe">MTD Revenue</p>
+                  <p className="text-lg font-semibold text-navy">$18,450</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Segment Revenue Breakdown */}
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              <p className="text-xs font-medium text-soft-taupe uppercase tracking-wider mb-2">Revenue by Segment</p>
+              {[
+                { name: "LifeCharter Circle", amount: 597, color: "#5E3B6C", icon: "⭕" },
+                { name: "LifeCharter Incubator", amount: 450, color: "#7B4F8C", icon: "🥚" },
+                { name: "Command Suite", amount: 300, color: "#2E7C83", icon: "⚡" },
+                { name: "AmiLynne Speaks", amount: 150, color: "#D4AF63", icon: "🎤" },
+              ].map((segment) => (
+                <div key={segment.name} className="flex items-center justify-between p-2 bg-cream-dark/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <span>{segment.icon}</span>
+                    <span className="text-sm text-navy">{segment.name}</span>
+                  </div>
+                  <span className="font-semibold text-navy">${segment.amount}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Links */}
+            <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+              <a 
+                href="/dashboard/money" 
+                className="flex-1 py-2 text-center text-sm text-navy bg-navy/5 rounded-lg hover:bg-navy/10 transition-colors"
+              >
+                View Full Money Tab
+              </a>
+              <a 
+                href="/dashboard/money?tab=pnl" 
+                className="flex-1 py-2 text-center text-sm text-navy bg-navy/5 rounded-lg hover:bg-navy/10 transition-colors"
+              >
+                Generate P&L
+              </a>
             </div>
           </div>
         );
