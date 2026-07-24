@@ -212,65 +212,29 @@ export default function SegmentDetailPage() {
     return "bg-red-50";
   };
 
-  // Debug output
-  console.log('Rendering - loading:', loading, 'segment:', segment?.name);
-
-  if (loading) {
-    return (
-      <div className="p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-navy/60 text-xl">Loading segment...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!segment) {
-    return (
-      <div className="p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-navy/60 text-xl">Segment not found</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-8">
-      {/* Breadcrumb & Back */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link
-          href="/dashboard/segments"
-          className="flex items-center gap-2 text-soft-taupe hover:text-navy transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back to Segments</span>
-        </Link>
-        <span className="text-soft-taupe">/</span>
-        <span className="text-soft-taupe">{segment.business.name}</span>
-        <span className="text-soft-taupe">/</span>
-        <span className="text-navy font-medium">{segment.name}</span>
-      </div>
-
-      {/* Header */}
+      {/* Always show header with buttons */}
       <div className="flex items-start justify-between mb-8">
         <div className="flex items-center gap-6">
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-lg"
-            style={{ backgroundColor: segment.color }}
+            style={{ backgroundColor: segment?.color || '#ccc' }}
           >
-            {segment.icon}
+            {segment?.icon || '❓'}
           </div>
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-serif text-navy">{segment.name}</h1>
-              <div
-                className={`px-3 py-1 rounded-full text-sm font-medium ${getHealthBgColor(avgDimensionScore)} ${getHealthTextColor(avgDimensionScore)}`}
-              >
-                {avgDimensionScore >= 80 ? "Healthy" : avgDimensionScore >= 60 ? "Attention" : "At Risk"}
-              </div>
+              <h1 className="text-3xl font-serif text-navy">{segment?.name || 'Loading...'}</h1>
+              {segment && (
+                <div
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getHealthBgColor(avgDimensionScore)} ${getHealthTextColor(avgDimensionScore)}`}
+                >
+                  {avgDimensionScore >= 80 ? "Healthy" : avgDimensionScore >= 60 ? "Attention" : "At Risk"}
+                </div>
+              )}
             </div>
-            <p className="text-soft-taupe max-w-2xl">{segment.description}</p>
+            <p className="text-soft-taupe max-w-2xl">{segment?.description || ''}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -298,6 +262,32 @@ export default function SegmentDetailPage() {
             Add Task
           </button>
         </div>
+      </div>
+
+      {/* Show loading or content */}
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-navy/60 text-xl">Loading segment data...</div>
+        </div>
+      ) : !segment ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-navy/60 text-xl">Segment not found</div>
+        </div>
+      ) : (
+      <>
+      {/* Breadcrumb & Back */}
+      <div className="flex items-center gap-4 mb-6">
+        <Link
+          href="/dashboard/segments"
+          className="flex items-center gap-2 text-soft-taupe hover:text-navy transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back to Segments</span>
+        </Link>
+        <span className="text-soft-taupe">/</span>
+        <span className="text-soft-taupe">{segment.business.name}</span>
+        <span className="text-soft-taupe">/</span>
+        <span className="text-navy font-medium">{segment.name}</span>
       </div>
 
       {/* Navigation Tabs */}
@@ -667,6 +657,8 @@ export default function SegmentDetailPage() {
             </div>
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );
