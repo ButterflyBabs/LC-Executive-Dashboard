@@ -1,7 +1,7 @@
 import { pgTable, serial, varchar, text, timestamp, integer, boolean, pgEnum, decimal, jsonb } from "drizzle-orm/pg-core";
 
 // Enums
-export const priorityEnum = pgEnum("priority", ["low", "medium", "high", "critical"]);
+export const priorityEnum = pgEnum("priority", ["optional", "low", "medium", "high", "critical"]);
 export const taskStatusEnum = pgEnum("task_status", ["backlog", "today", "in_progress", "waiting", "done"]);
 export const healthEnum = pgEnum("health", ["healthy", "attention", "at_risk"]);
 

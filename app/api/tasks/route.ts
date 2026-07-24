@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { tasks, businesses } from "@/db/schema";
+import { tasks, businesses, segments } from "@/db/schema";
 import { eq, and, or, desc } from "drizzle-orm";
 
 // GET /api/tasks - Get all tasks with optional filters
@@ -9,14 +9,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const businessId = searchParams.get("businessId");
+    const segmentId = searchParams.get("segmentId");
     const dimension = searchParams.get("dimension");
 
     let query = db.select({
       task: tasks,
       business: businesses,
+      segment: segments,
     })
     .from(tasks)
-    .leftJoin(businesses, eq(tasks.businessId, businesses.id));
+    .leftJoin(businesses, eq(tasks.businessId, businesses.id))
+    .leftJoin(segments, eq(tasks.segmentId, segments.id));
 
     // Apply filters
     const conditions = [];
@@ -28,6 +31,10 @@ export async function GET(request: NextRequest) {
     
     if (businessId) {
       conditions.push(eq(tasks.businessId, parseInt(businessId)));
+    }
+
+    if (segmentId) {
+      conditions.push(eq(tasks.segmentId, parseInt(segmentId)));
     }
 
     if (dimension) {
@@ -44,13 +51,20 @@ export async function GET(request: NextRequest) {
     const results = await query.orderBy(desc(tasks.createdAt));
 
     // Format response
-    const formattedTasks = results.map(({ task, business }) => ({
+    const formattedTasks = results.map(({ task, business, segment }) => ({
       ...task,
       business: business ? {
         id: business.id,
         name: business.name,
         icon: business.icon,
         color: business.color,
+      } : null,
+      segment: segment ? {
+        id: segment.id,
+        name: segment.name,
+        slug: segment.slug,
+        color: segment.color,
+        businessId: segment.businessId,
       } : null,
       // Extract dimensions as array
       dimensions: [
@@ -89,6 +103,7 @@ export async function POST(request: NextRequest) {
       status = "backlog",
       priority = "medium",
       businessId,
+      segmentId,
       dimensions = [],
       dueDate,
     } = body;
@@ -115,6 +130,7 @@ export async function POST(request: NextRequest) {
       status,
       priority,
       businessId,
+      segmentId,
       ...dimensionFlags,
       dueDate: dueDate ? new Date(dueDate) : null,
     }).returning();

@@ -13,6 +13,14 @@ import {
   Circle,
   Clock,
   AlertCircle,
+  Filter,
+  ChevronDown,
+  Search,
+  Layers,
+  Briefcase,
+  Target,
+  Zap,
+  Coffee,
 } from "lucide-react";
 
 // Types
@@ -23,6 +31,14 @@ interface Business {
   color: string;
 }
 
+interface Segment {
+  id: number;
+  name: string;
+  slug: string;
+  color: string;
+  businessId: number;
+}
+
 interface Task {
   id: number;
   title: string;
@@ -30,10 +46,12 @@ interface Task {
   status: string;
   priority: string;
   businessId: number | null;
+  segmentId: number | null;
   dimensions: string[];
   dueDate: string | null;
   createdAt: string;
   business: Business | null;
+  segment: Segment | null;
 }
 
 const columns = [
@@ -44,11 +62,58 @@ const columns = [
   { id: "done", name: "Done", color: "bg-green-50" },
 ];
 
+// 5 Priority Statuses with icons and descriptions
 const priorities = [
-  { id: "low", name: "Low", color: "bg-green-400" },
-  { id: "medium", name: "Medium", color: "bg-yellow-400" },
-  { id: "high", name: "High", color: "bg-orange-400" },
-  { id: "critical", name: "Critical", color: "bg-red-400" },
+  { 
+    id: "critical", 
+    name: "Critical", 
+    color: "bg-red-500",
+    textColor: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
+    icon: AlertCircle,
+    description: "Must do today - blocks other work"
+  },
+  { 
+    id: "high", 
+    name: "High", 
+    color: "bg-orange-500",
+    textColor: "text-orange-600",
+    bgColor: "bg-orange-50",
+    borderColor: "border-orange-200",
+    icon: Zap,
+    description: "Important - do this week"
+  },
+  { 
+    id: "medium", 
+    name: "Medium", 
+    color: "bg-yellow-500",
+    textColor: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    borderColor: "border-yellow-200",
+    icon: Target,
+    description: "Should do - schedule soon"
+  },
+  { 
+    id: "low", 
+    name: "Low", 
+    color: "bg-blue-500",
+    textColor: "text-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+    icon: Coffee,
+    description: "Nice to have - when time permits"
+  },
+  { 
+    id: "optional", 
+    name: "Optional", 
+    color: "bg-gray-400",
+    textColor: "text-gray-600",
+    bgColor: "bg-gray-50",
+    borderColor: "border-gray-200",
+    icon: Circle,
+    description: "Backlog - revisit later"
+  },
 ];
 
 const dimensions = [
@@ -69,9 +134,17 @@ const dimensions = [
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  
+  // Filters
+  const [filterBusiness, setFilterBusiness] = useState<string>("");
+  const [filterSegment, setFilterSegment] = useState<string>("");
+  const [filterPriority, setFilterPriority] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -80,20 +153,22 @@ export default function TasksPage() {
     status: "backlog",
     priority: "medium",
     businessId: "",
+    segmentId: "",
     dimensions: [] as string[],
     dueDate: "",
   });
 
-  // Fetch tasks and businesses
+  // Fetch tasks, businesses, and segments
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [tasksRes, businessesRes] = await Promise.all([
+      const [tasksRes, businessesRes, segmentsRes] = await Promise.all([
         fetch("/api/tasks"),
         fetch("/api/businesses"),
+        fetch("/api/segments"),
       ]);
 
       if (tasksRes.ok) {
@@ -105,11 +180,37 @@ export default function TasksPage() {
         const businessesData = await businessesRes.json();
         setBusinesses(businessesData.businesses);
       }
+
+      if (segmentsRes.ok) {
+        const segmentsData = await segmentsRes.json();
+        setSegments(segmentsData.segments);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter tasks
+  const filteredTasks = tasks.filter((task) => {
+    if (filterBusiness && task.businessId?.toString() !== filterBusiness) return false;
+    if (filterSegment && task.segmentId?.toString() !== filterSegment) return false;
+    if (filterPriority && task.priority !== filterPriority) return false;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        task.title.toLowerCase().includes(query) ||
+        task.description?.toLowerCase().includes(query)
+      );
+    }
+    return true;
+  });
+
+  // Get segments for selected business
+  const getSegmentsForBusiness = (businessId: string) => {
+    if (!businessId) return [];
+    return segments.filter((s) => s.businessId === parseInt(businessId));
   };
 
   const handleCreateTask = async (e: React.FormEvent) => {
@@ -122,6 +223,7 @@ export default function TasksPage() {
         body: JSON.stringify({
           ...formData,
           businessId: formData.businessId ? parseInt(formData.businessId) : null,
+          segmentId: formData.segmentId ? parseInt(formData.segmentId) : null,
         }),
       });
 
@@ -133,6 +235,7 @@ export default function TasksPage() {
           status: "backlog",
           priority: "medium",
           businessId: "",
+          segmentId: "",
           dimensions: [],
           dueDate: "",
         });
@@ -202,8 +305,12 @@ export default function TasksPage() {
     }));
   };
 
-  const getPriorityColor = (priority: string) => {
-    return priorities.find((p) => p.id === priority)?.color || "bg-gray-400";
+  const getPriorityInfo = (priorityId: string) => {
+    return priorities.find((p) => p.id === priorityId) || priorities[2];
+  };
+
+  const getPriorityCount = (priorityId: string) => {
+    return filteredTasks.filter((t) => t.priority === priorityId && t.status !== "done").length;
   };
 
   if (loading) {
@@ -217,10 +324,10 @@ export default function TasksPage() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-serif text-navy mb-2">Tasks</h1>
-          <p className="text-soft-taupe">Manage your work across all businesses and dimensions</p>
+          <p className="text-soft-taupe">Manage work across all business segments</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -229,6 +336,101 @@ export default function TasksPage() {
           <Plus className="w-5 h-5" />
           Add Task
         </button>
+      </div>
+
+      {/* Priority Overview */}
+      <div className="grid grid-cols-5 gap-3 mb-6">
+        {priorities.map((priority) => {
+          const count = getPriorityCount(priority.id);
+          const Icon = priority.icon;
+          return (
+            <div
+              key={priority.id}
+              onClick={() => setFilterPriority(filterPriority === priority.id ? "" : priority.id)}
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                filterPriority === priority.id
+                  ? `${priority.borderColor} ${priority.bgColor}`
+                  : "border-gray-200 bg-white hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`p-1.5 rounded-lg ${priority.bgColor}`}>
+                  <Icon className={`w-4 h-4 ${priority.textColor}`} />
+                </div>
+                <span className={`text-sm font-medium ${priority.textColor}`}>{priority.name}</span>
+              </div>
+              <p className="text-2xl font-bold text-navy">{count}</p>
+              <p className="text-xs text-soft-taupe mt-1">{priority.description}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Filters */}
+      <div className="flex items-center gap-4 mb-6 bg-white p-4 rounded-xl soft-shadow">
+        <div className="flex items-center gap-2">
+          <Filter className="w-5 h-5 text-soft-taupe" />
+          <span className="text-sm font-medium text-navy">Filter by:</span>
+        </div>
+        
+        {/* Business Filter */}
+        <select
+          value={filterBusiness}
+          onChange={(e) => {
+            setFilterBusiness(e.target.value);
+            setFilterSegment(""); // Reset segment when business changes
+          }}
+          className="px-4 py-2 rounded-lg border border-gray-200 text-sm focus:border-navy outline-none"
+        >
+          <option value="">All Businesses</option>
+          {businesses.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.icon} {b.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Segment Filter */}
+        <select
+          value={filterSegment}
+          onChange={(e) => setFilterSegment(e.target.value)}
+          className="px-4 py-2 rounded-lg border border-gray-200 text-sm focus:border-navy outline-none"
+          disabled={!filterBusiness}
+        >
+          <option value="">All Segments</option>
+          {getSegmentsForBusiness(filterBusiness).map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Search */}
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-soft-taupe" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:border-navy outline-none"
+          />
+        </div>
+
+        {/* Clear Filters */}
+        {(filterBusiness || filterSegment || filterPriority || searchQuery) && (
+          <button
+            onClick={() => {
+              setFilterBusiness("");
+              setFilterSegment("");
+              setFilterPriority("");
+              setSearchQuery("");
+            }}
+            className="text-sm text-teal hover:underline"
+          >
+            Clear all
+          </button>
+        )}
       </div>
 
       {/* Kanban Board */}
@@ -245,7 +447,7 @@ export default function TasksPage() {
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-navy">{column.name}</h3>
                 <span className="bg-white/70 text-navy/70 text-xs px-2 py-1 rounded-full font-medium">
-                  {tasks.filter((t) => t.status === column.id).length}
+                  {filteredTasks.filter((t) => t.status === column.id).length}
                 </span>
               </div>
             </div>
@@ -253,78 +455,97 @@ export default function TasksPage() {
             {/* Column Content */}
             <div className={`${column.color} rounded-b-xl p-4 min-h-[400px]`}>
               <div className="space-y-3">
-                {tasks
+                {filteredTasks
                   .filter((task) => task.status === column.id)
-                  .map((task) => (
-                    <div
-                      key={task.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, task.id)}
-                      className="bg-white rounded-xl p-4 soft-shadow cursor-move hover:shadow-lg transition-all group"
-                    >
-                      {/* Task Header */}
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)}`} />
-                          <span className="text-xs text-soft-taupe uppercase font-medium">
-                            {task.priority}
+                  .map((task) => {
+                    const priorityInfo = getPriorityInfo(task.priority);
+                    const PriorityIcon = priorityInfo.icon;
+                    
+                    return (
+                      <div
+                        key={task.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        className="bg-white rounded-xl p-4 soft-shadow cursor-move hover:shadow-lg transition-all group"
+                      >
+                        {/* Priority Badge */}
+                        <div className={`flex items-center gap-2 mb-2 px-2 py-1 rounded-lg ${priorityInfo.bgColor} w-fit`}>
+                          <PriorityIcon className={`w-3 h-3 ${priorityInfo.textColor}`} />
+                          <span className={`text-xs font-medium ${priorityInfo.textColor}`}>
+                            {priorityInfo.name}
                           </span>
                         </div>
-                        <button
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="opacity-0 group-hover:opacity-100 text-soft-taupe hover:text-red-500 transition-all"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
 
-                      {/* Task Title */}
-                      <h4 className="font-medium text-navy mb-2">{task.title}</h4>
+                        {/* Task Title */}
+                        <h4 className="font-medium text-navy mb-2">{task.title}</h4>
 
-                      {/* Task Description */}
-                      {task.description && (
-                        <p className="text-sm text-navy/60 mb-3 line-clamp-2">{task.description}</p>
-                      )}
+                        {/* Task Description */}
+                        {task.description && (
+                          <p className="text-sm text-navy/60 mb-3 line-clamp-2">{task.description}</p>
+                        )}
 
-                      {/* Business Tag */}
-                      {task.business && (
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-lg">{task.business.icon}</span>
-                          <span className="text-xs text-navy/70">{task.business.name}</span>
-                        </div>
-                      )}
-
-                      {/* Dimensions */}
-                      {task.dimensions.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {task.dimensions.slice(0, 3).map((dim) => {
-                            const dimInfo = dimensions.find((d) => d.id === dim);
-                            return (
-                              <span
-                                key={dim}
-                                className={`text-[10px] px-2 py-1 rounded-full ${dimInfo?.color || "bg-gray-100"}`}
-                              >
-                                {dimInfo?.name || dim}
-                              </span>
-                            );
-                          })}
-                          {task.dimensions.length > 3 && (
-                            <span className="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                              +{task.dimensions.length - 3}
-                            </span>
+                        {/* Business & Segment */}
+                        <div className="space-y-1 mb-3">
+                          {task.business && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{task.business.icon}</span>
+                              <span className="text-xs text-navy/70">{task.business.name}</span>
+                            </div>
+                          )}
+                          {task.segment && (
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-2 h-2 rounded-full" 
+                                style={{ backgroundColor: task.segment.color }}
+                              />
+                              <span className="text-xs text-soft-taupe">{task.segment.name}</span>
+                            </div>
                           )}
                         </div>
-                      )}
 
-                      {/* Due Date */}
-                      {task.dueDate && (
-                        <div className="flex items-center gap-1 mt-3 text-xs text-soft-taupe">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(task.dueDate).toLocaleDateString()}
+                        {/* Dimensions */}
+                        {task.dimensions.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-3">
+                            {task.dimensions.slice(0, 3).map((dim) => {
+                              const dimInfo = dimensions.find((d) => d.id === dim);
+                              return (
+                                <span
+                                  key={dim}
+                                  className={`text-[10px] px-2 py-1 rounded-full ${dimInfo?.color || "bg-gray-100"}`}
+                                >
+                                  {dimInfo?.name || dim}
+                                </span>
+                              );
+                            })}
+                            {task.dimensions.length > 3 && (
+                              <span className="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                +{task.dimensions.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                          {/* Due Date */}
+                          {task.dueDate && (
+                            <div className="flex items-center gap-1 text-xs text-soft-taupe">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(task.dueDate).toLocaleDateString()}
+                            </div>
+                          )}
+                          
+                          {/* Actions */}
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="opacity-0 group-hover:opacity-100 text-soft-taupe hover:text-red-500 transition-all"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>
@@ -395,28 +616,48 @@ export default function TasksPage() {
                   >
                     {priorities.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name}
+                        {p.name} - {p.description}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              {/* Business */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-navy mb-2">Business</label>
-                <select
-                  value={formData.businessId}
-                  onChange={(e) => setFormData({ ...formData, businessId: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
-                >
-                  <option value="">Select a business...</option>
-                  {businesses.map((business) => (
-                    <option key={business.id} value={business.id}>
-                      {business.icon} {business.name}
-                    </option>
-                  ))}
-                </select>
+              {/* Business & Segment */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-2">Business</label>
+                  <select
+                    value={formData.businessId}
+                    onChange={(e) => {
+                      setFormData({ ...formData, businessId: e.target.value, segmentId: "" });
+                    }}
+                    className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+                  >
+                    <option value="">Select a business...</option>
+                    {businesses.map((business) => (
+                      <option key={business.id} value={business.id}>
+                        {business.icon} {business.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-2">Segment</label>
+                  <select
+                    value={formData.segmentId}
+                    onChange={(e) => setFormData({ ...formData, segmentId: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-soft-taupe/30 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+                    disabled={!formData.businessId}
+                  >
+                    <option value="">Select a segment...</option>
+                    {getSegmentsForBusiness(formData.businessId).map((segment) => (
+                      <option key={segment.id} value={segment.id}>
+                        {segment.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Dimensions */}
