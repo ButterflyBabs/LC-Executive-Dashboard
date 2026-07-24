@@ -134,6 +134,9 @@ interface TeamMember {
   name: string;
   role: string;
   type: "employee" | "contractor" | "va";
+  taxClassification: "W2" | "1099" | "OS";
+  location: "US" | "OS";
+  paymentMethod: "Wise" | "PayPal" | "Venmo" | "Bank Draft";
   hourlyRate: number;
   hoursPerWeek: number;
   monthlyCost: number;
@@ -144,6 +147,9 @@ interface TeamMember {
   assignedSegments: string[];
   tasksCompleted: number;
   revenueAttributed: number;
+  phone: string;
+  personalEmail: string;
+  businessEmail: string;
 }
 
 const mockTeamMembers: TeamMember[] = [
@@ -152,6 +158,9 @@ const mockTeamMembers: TeamMember[] = [
     name: "Aira",
     role: "Virtual Assistant - Content & Admin",
     type: "va",
+    taxClassification: "1099",
+    location: "OS",
+    paymentMethod: "Wise",
     hourlyRate: 25,
     hoursPerWeek: 20,
     monthlyCost: 2000,
@@ -161,12 +170,18 @@ const mockTeamMembers: TeamMember[] = [
     assignedSegments: ["LifeCharter Core", "Content"],
     tasksCompleted: 156,
     revenueAttributed: 15000,
+    phone: "+63 912 345 6789",
+    personalEmail: "aira.personal@email.com",
+    businessEmail: "aira@sacredkaleidoscope.com",
   },
   {
     id: "2",
     name: "Sarah Johnson",
     role: "Community Manager",
     type: "contractor",
+    taxClassification: "1099",
+    location: "US",
+    paymentMethod: "PayPal",
     hourlyRate: 35,
     hoursPerWeek: 15,
     monthlyCost: 2100,
@@ -176,12 +191,18 @@ const mockTeamMembers: TeamMember[] = [
     assignedSegments: ["LifeCharter Circle", "Community"],
     tasksCompleted: 89,
     revenueAttributed: 8500,
+    phone: "+1 (555) 234-5678",
+    personalEmail: "sarah.j@gmail.com",
+    businessEmail: "sarah@sacredkaleidoscope.com",
   },
   {
     id: "3",
     name: "Michael Chen",
     role: "Tech Developer",
     type: "contractor",
+    taxClassification: "1099",
+    location: "US",
+    paymentMethod: "Bank Draft",
     hourlyRate: 75,
     hoursPerWeek: 10,
     monthlyCost: 3000,
@@ -191,12 +212,18 @@ const mockTeamMembers: TeamMember[] = [
     assignedSegments: ["Command Suite", "Systems"],
     tasksCompleted: 45,
     revenueAttributed: 0,
+    phone: "+1 (555) 876-5432",
+    personalEmail: "mchen.dev@protonmail.com",
+    businessEmail: "michael@sacredkaleidoscope.com",
   },
   {
     id: "4",
     name: "Jessica Williams",
     role: "Marketing Specialist",
     type: "employee",
+    taxClassification: "W2",
+    location: "US",
+    paymentMethod: "Bank Draft",
     hourlyRate: 30,
     hoursPerWeek: 40,
     monthlyCost: 4800,
@@ -206,6 +233,9 @@ const mockTeamMembers: TeamMember[] = [
     assignedSegments: ["Marketing", "Sales"],
     tasksCompleted: 203,
     revenueAttributed: 28000,
+    phone: "+1 (555) 123-4567",
+    personalEmail: "jessica.williams@yahoo.com",
+    businessEmail: "jessica@sacredkaleidoscope.com",
   },
 ];
 
@@ -807,55 +837,55 @@ export default function MoneyPage() {
           {/* Human Capital Overview */}
           <div className="grid grid-cols-4 gap-6">
             <div className="bg-white rounded-2xl p-6 soft-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-blue-600" />
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-5 h-5 text-blue-600" />
                 </div>
-                <div>
-                  <p className="text-sm text-soft-taupe">Total Team Cost</p>
-                  <p className="text-2xl font-bold text-navy">{formatCurrency(humanCapitalMetrics.totalMonthlyCost)}/mo</p>
+                <div className="min-w-0">
+                  <p className="text-xs text-soft-taupe truncate">Total Team Cost</p>
+                  <p className="text-xl font-bold text-navy truncate">{formatCurrency(humanCapitalMetrics.totalMonthlyCost)}/mo</p>
                 </div>
               </div>
-              <p className="text-sm text-soft-taupe">{humanCapitalMetrics.headcount} active members</p>
+              <p className="text-xs text-soft-taupe">{humanCapitalMetrics.headcount} active members</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 soft-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                  <TrendingUpIcon className="w-6 h-6 text-green-600" />
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <TrendingUpIcon className="w-5 h-5 text-green-600" />
                 </div>
-                <div>
-                  <p className="text-sm text-soft-taupe">Revenue Generating</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(humanCapitalMetrics.revenueGeneratingCost)}/mo</p>
+                <div className="min-w-0">
+                  <p className="text-xs text-soft-taupe truncate">Revenue Gen</p>
+                  <p className="text-xl font-bold text-green-600 truncate">{formatCurrency(humanCapitalMetrics.revenueGeneratingCost)}/mo</p>
                 </div>
               </div>
-              <p className="text-sm text-green-600">{Math.round((humanCapitalMetrics.revenueGeneratingCost / humanCapitalMetrics.totalMonthlyCost) * 100)}% of payroll</p>
+              <p className="text-xs text-green-600">{Math.round((humanCapitalMetrics.revenueGeneratingCost / humanCapitalMetrics.totalMonthlyCost) * 100)}% of payroll</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 soft-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-orange-600" />
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <Briefcase className="w-5 h-5 text-orange-600" />
                 </div>
-                <div>
-                  <p className="text-sm text-soft-taupe">Support/Operations</p>
-                  <p className="text-2xl font-bold text-orange-600">{formatCurrency(humanCapitalMetrics.nonRevenueCost)}/mo</p>
+                <div className="min-w-0">
+                  <p className="text-xs text-soft-taupe truncate">Support/Ops</p>
+                  <p className="text-xl font-bold text-orange-600 truncate">{formatCurrency(humanCapitalMetrics.nonRevenueCost)}/mo</p>
                 </div>
               </div>
-              <p className="text-sm text-orange-600">{Math.round((humanCapitalMetrics.nonRevenueCost / humanCapitalMetrics.totalMonthlyCost) * 100)}% of payroll</p>
+              <p className="text-xs text-orange-600">{Math.round((humanCapitalMetrics.nonRevenueCost / humanCapitalMetrics.totalMonthlyCost) * 100)}% of payroll</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 soft-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <Target className="w-6 h-6 text-purple-600" />
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <Target className="w-5 h-5 text-purple-600" />
                 </div>
-                <div>
-                  <p className="text-sm text-soft-taupe">Team ROI</p>
-                  <p className="text-2xl font-bold text-purple-600">{humanCapitalMetrics.avgROI}x</p>
+                <div className="min-w-0">
+                  <p className="text-xs text-soft-taupe truncate">Team ROI</p>
+                  <p className="text-xl font-bold text-purple-600">{humanCapitalMetrics.avgROI}x</p>
                 </div>
               </div>
-              <p className="text-sm text-purple-600">Revenue per $1 spent</p>
+              <p className="text-xs text-purple-600">Revenue per $1 spent</p>
             </div>
           </div>
 
@@ -875,32 +905,58 @@ export default function MoneyPage() {
                 return (
                   <div key={member.id} className="p-4 hover:bg-gray-50">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-full bg-navy/10 flex items-center justify-center text-navy font-bold text-lg">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="w-12 h-12 rounded-full bg-navy/10 flex items-center justify-center text-navy font-bold text-lg flex-shrink-0">
                           {member.name[0]}
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium text-navy">{member.name}</p>
                             <span className={`text-xs px-2 py-0.5 rounded-full ${
                               member.revenueGenerating ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
                             }`}>
-                              {member.revenueGenerating ? "Revenue Generating" : "Support/Operations"}
+                              {member.revenueGenerating ? "Revenue" : "Support"}
                             </span>
                             <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              member.type === "employee" ? "bg-blue-100 text-blue-700" :
-                              member.type === "contractor" ? "bg-purple-100 text-purple-700" :
+                              member.taxClassification === "W2" ? "bg-blue-100 text-blue-700" :
+                              member.taxClassification === "1099" ? "bg-purple-100 text-purple-700" :
                               "bg-gray-100 text-gray-700"
                             }`}>
-                              {member.type === "va" ? "VA" : member.type}
+                              {member.taxClassification}
+                            </span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-cream-dark text-navy/70">
+                              {member.location}
                             </span>
                           </div>
                           <p className="text-sm text-soft-taupe">{member.role}</p>
-                          <div className="flex items-center gap-4 mt-2 text-sm">
-                            <span className="text-soft-taupe">{member.hoursPerWeek} hrs/week</span>
+                          
+                          {/* Work Details */}
+                          <div className="flex items-center gap-4 mt-2 text-sm flex-wrap">
+                            <span className="text-soft-taupe">{member.hoursPerWeek} hrs/wk</span>
                             <span className="text-soft-taupe">${member.hourlyRate}/hr</span>
                             <span className="text-soft-taupe">Started {member.startDate.toLocaleDateString()}</span>
+                            <span className="text-soft-taupe flex items-center gap-1">
+                              <span className="text-xs">💳</span> {member.paymentMethod}
+                            </span>
                           </div>
+                          
+                          {/* Contact Info */}
+                          <div className="mt-3 space-y-1 text-xs">
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <span className="text-soft-taupe flex items-center gap-1">
+                                <span>📞</span> {member.phone}
+                              </span>
+                              <span className="text-soft-taupe flex items-center gap-1">
+                                <span>📧</span> {member.businessEmail}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <span className="text-soft-taupe flex items-center gap-1">
+                                <span>🏠</span> {member.personalEmail}
+                              </span>
+                            </div>
+                          </div>
+                          
                           <div className="flex flex-wrap gap-1 mt-2">
                             {member.assignedSegments.map((segment) => (
                               <span key={segment} className="text-xs px-2 py-1 bg-cream-dark rounded-full text-navy/70">
@@ -910,27 +966,27 @@ export default function MoneyPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="grid grid-cols-3 gap-6">
+                      <div className="text-right flex-shrink-0 ml-4">
+                        <div className="grid grid-cols-3 gap-4">
                           <div className="text-center">
-                            <p className="text-sm text-soft-taupe">Monthly Cost</p>
+                            <p className="text-xs text-soft-taupe">Monthly</p>
                             <p className="font-semibold text-navy">{formatCurrency(member.monthlyCost)}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-sm text-soft-taupe">Revenue Attributed</p>
+                            <p className="text-xs text-soft-taupe">Revenue</p>
                             <p className={`font-semibold ${member.revenueAttributed > 0 ? "text-green-600" : "text-soft-taupe"}`}>
                               {formatCurrency(member.revenueAttributed)}
                             </p>
                           </div>
                           <div className="text-center">
-                            <p className="text-sm text-soft-taupe">ROI</p>
+                            <p className="text-xs text-soft-taupe">ROI</p>
                             <p className={`font-semibold ${isProfitable ? "text-green-600" : "text-red-600"}`}>
                               {roi.toFixed(1)}x
                             </p>
                           </div>
                         </div>
                         <div className="mt-3 flex items-center justify-end gap-2">
-                          <span className="text-xs text-soft-taupe">{member.tasksCompleted} tasks completed</span>
+                          <span className="text-xs text-soft-taupe">{member.tasksCompleted} tasks</span>
                           <button className="p-2 hover:bg-gray-100 rounded-lg">
                             <MoreHorizontal className="w-4 h-4 text-soft-taupe" />
                           </button>
