@@ -35,6 +35,7 @@ const navigationSections = [
       { name: "INBOX", icon: Mail, href: "/dashboard/inbox" },
       { name: "TASKS", icon: CheckSquare, href: "/dashboard/tasks" },
       { name: "MONEY", icon: DollarSign, href: "/dashboard/money" },
+      { name: "SOCIAL", icon: Megaphone, href: "/dashboard/social" },
     ],
   },
   {
