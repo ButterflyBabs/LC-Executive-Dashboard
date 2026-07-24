@@ -280,6 +280,110 @@ export default function MoneyPage() {
             </div>
           </div>
 
+          {/* Daily Revenue Watcher */}
+          <div className="bg-white rounded-2xl p-6 soft-shadow">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-navy">Revenue Watcher</h3>
+                <p className="text-sm text-soft-taupe">Daily breakdown of income and expenses</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {[
+                  { id: "day", label: "Day" },
+                  { id: "week", label: "Week" },
+                  { id: "month", label: "Month" },
+                  { id: "quarter", label: "Quarter" },
+                  { id: "semi", label: "6 Months" },
+                  { id: "year", label: "Year" },
+                ].map((period) => (
+                  <button
+                    key={period.id}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-navy/5 text-navy hover:bg-navy/10 transition-colors"
+                  >
+                    {period.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Daily Breakdown Grid */}
+            <div className="grid grid-cols-7 gap-3">
+              {[
+                { day: "Mon", date: "21", income: 450, expense: 120 },
+                { day: "Tue", date: "22", income: 0, expense: 297 },
+                { day: "Wed", date: "23", income: 1200, expense: 45 },
+                { day: "Thu", date: "24", income: 297, expense: 20 },
+                { day: "Fri", date: "25", income: 0, expense: 0 },
+                { day: "Sat", date: "26", income: 0, expense: 0 },
+                { day: "Sun", date: "27", income: 0, expense: 0 },
+              ].map((day, idx) => (
+                <div
+                  key={idx}
+                  className={`p-4 rounded-xl border-2 ${
+                    day.date === "24" ? "border-gold bg-gold/5" : "border-gray-100"
+                  }`}
+                >
+                  <p className="text-xs text-soft-taupe text-center">{day.day}</p>
+                  <p className="text-lg font-bold text-navy text-center mb-3">{day.date}</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-green-600">In</span>
+                      <span className="text-sm font-medium text-green-600">
+                        {day.income > 0 ? formatCurrency(day.income) : "-"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-red-600">Out</span>
+                      <span className="text-sm font-medium text-red-600">
+                        {day.expense > 0 ? formatCurrency(day.expense) : "-"}
+                      </span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-navy">Net</span>
+                        <span className={`text-sm font-bold ${day.income - day.expense >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          {formatCurrency(day.income - day.expense)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Period Totals */}
+            <div className="grid grid-cols-3 gap-6 mt-6 pt-6 border-t border-gray-200">
+              <div className="text-center">
+                <p className="text-sm text-soft-taupe mb-1">Period Income</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(1947)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-soft-taupe mb-1">Period Expenses</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(482)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-soft-taupe mb-1">Net for Period</p>
+                <p className="text-2xl font-bold text-navy">{formatCurrency(1465)}</p>
+              </div>
+            </div>
+
+            {/* Daily Average */}
+            <div className="flex items-center justify-center gap-8 mt-6 pt-6 border-t border-gray-200">
+              <div className="text-center">
+                <p className="text-sm text-soft-taupe mb-1">Daily Avg Income</p>
+                <p className="text-xl font-bold text-green-600">{formatCurrency(278.14)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-soft-taupe mb-1">Daily Avg Expense</p>
+                <p className="text-xl font-bold text-red-600">{formatCurrency(68.86)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-soft-taupe mb-1">Daily Avg Net</p>
+                <p className="text-xl font-bold text-navy">{formatCurrency(209.29)}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Accounts & Upcoming Renewals */}
           <div className="grid grid-cols-3 gap-6">
             {/* Accounts List */}
@@ -723,8 +827,8 @@ export default function MoneyPage() {
 
       {/* Connect Account Modal */}
       {showAddAccount && (
-        <div className="fixed inset-0 bg-navy/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
+        <div className="fixed inset-0 bg-navy/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-serif text-navy">Connect Account</h2>
               <button onClick={() => setShowAddAccount(false)} className="p-2 hover:bg-gray-100 rounded-lg">
