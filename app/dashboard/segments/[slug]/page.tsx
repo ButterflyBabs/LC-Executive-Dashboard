@@ -212,18 +212,25 @@ export default function SegmentDetailPage() {
     return "bg-red-50";
   };
 
+  // Debug output
+  console.log('Rendering - loading:', loading, 'segment:', segment?.name);
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-navy/60">Loading segment...</div>
+      <div className="p-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-navy/60 text-xl">Loading segment...</div>
+        </div>
       </div>
     );
   }
 
   if (!segment) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-navy/60">Segment not found</div>
+      <div className="p-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-navy/60 text-xl">Segment not found</div>
+        </div>
       </div>
     );
   }
