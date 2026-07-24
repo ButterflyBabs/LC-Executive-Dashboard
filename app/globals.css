@@ -94,3 +94,40 @@
 .focus-ring {
   @apply focus:outline-none focus:ring-2 focus:ring-[#d4af63] focus:ring-offset-2 focus:ring-offset-[#F8F5F0];
 }
+
+/* Mobile touch improvements */
+@media (hover: none) {
+  .hover\:bg-white\/5:hover {
+    background-color: transparent;
+  }
+  .hover\:text-white:hover {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Safe area for mobile devices */
+@supports (padding: max(0px)) {
+  .mobile-safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Prevent text selection on UI elements */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Smooth scrolling for the whole app */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile viewport fix */
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+}
