@@ -534,45 +534,47 @@ export default function MoneyPage() {
       {activeTab === "pnl" && (
         <div className="space-y-6">
           {/* Period Selector */}
-          <div className="flex items-center justify-between bg-white p-4 rounded-xl soft-shadow">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-navy">Report Period:</span>
-              <div className="flex items-center gap-2">
-                {[
-                  { id: "weekly", label: "Weekly" },
-                  { id: "monthly", label: "Monthly" },
-                  { id: "quarterly", label: "Quarterly" },
-                  { id: "semi-annual", label: "Semi-Annual" },
-                  { id: "annual", label: "Annual" },
-                ].map((period) => (
-                  <button
-                    key={period.id}
-                    onClick={() => setSelectedPeriod(period.id as any)}
-                    className={`px-4 py-2 rounded-lg text-sm transition-all ${
-                      selectedPeriod === period.id
-                        ? "bg-navy text-white"
-                        : "text-soft-taupe hover:bg-gray-100"
-                    }`}
-                  >
-                    {period.label}
-                  </button>
-                ))}
+          <div className="bg-white p-4 rounded-xl soft-shadow">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-sm font-medium text-navy">Report Period:</span>
+                <div className="flex items-center gap-1 flex-wrap">
+                  {[
+                    { id: "weekly", label: "Weekly" },
+                    { id: "monthly", label: "Monthly" },
+                    { id: "quarterly", label: "Quarterly" },
+                    { id: "semi-annual", label: "Semi-Annual" },
+                    { id: "annual", label: "Annual" },
+                  ].map((period) => (
+                    <button
+                      key={period.id}
+                      onClick={() => setSelectedPeriod(period.id as any)}
+                      className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+                        selectedPeriod === period.id
+                          ? "bg-navy text-white"
+                          : "text-soft-taupe hover:bg-gray-100"
+                      }`}
+                    >
+                      {period.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="date"
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm"
-              />
-              <span className="text-soft-taupe">to</span>
-              <input
-                type="date"
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm"
-              />
-              <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-lg">
-                <Calculator className="w-4 h-4" />
-                Generate P&L
-              </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <input
+                  type="date"
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-sm w-32"
+                />
+                <span className="text-soft-taupe text-sm">to</span>
+                <input
+                  type="date"
+                  className="px-3 py-2 rounded-lg border border-gray-200 text-sm w-32"
+                />
+                <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-lg whitespace-nowrap">
+                  <Calculator className="w-4 h-4" />
+                  Generate P&L
+                </button>
+              </div>
             </div>
           </div>
 
