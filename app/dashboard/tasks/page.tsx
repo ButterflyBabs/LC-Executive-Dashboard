@@ -129,6 +129,15 @@ const dimensions = [
   { id: "customer_experience", name: "Customer Experience", color: "bg-teal-100 text-teal-700" },
   { id: "legal", name: "Legal", color: "bg-slate-100 text-slate-700" },
   { id: "sustainability", name: "Sustainability", color: "bg-lime-100 text-lime-700" },
+  { id: "social_media", name: "Social Media", color: "bg-orange-100 text-orange-700", hasLink: true, linkTo: "/dashboard/social" },
+];
+
+// Social content task types
+const socialTaskTypes = [
+  { id: "create_post", name: "Create Social Post", icon: "📱", action: "creator" },
+  { id: "schedule_content", name: "Schedule Content", icon: "📅", action: "calendar" },
+  { id: "review_posts", name: "Review Pending Posts", icon: "👀", action: "planner" },
+  { id: "plan_campaign", name: "Plan Campaign", icon: "🎯", action: "planner" },
 ];
 
 export default function TasksPage() {
@@ -508,11 +517,13 @@ export default function TasksPage() {
                           <div className="flex flex-wrap gap-1 mt-3">
                             {task.dimensions.slice(0, 3).map((dim) => {
                               const dimInfo = dimensions.find((d) => d.id === dim);
+                              const isSocial = dim === "social_media";
                               return (
                                 <span
                                   key={dim}
-                                  className={`text-[10px] px-2 py-1 rounded-full ${dimInfo?.color || "bg-gray-100"}`}
+                                  className={`text-[10px] px-2 py-1 rounded-full ${dimInfo?.color || "bg-gray-100"} ${isSocial ? "cursor-pointer hover:opacity-80" : ""}`}
                                 >
+                                  {isSocial && "📱 "}
                                   {dimInfo?.name || dim}
                                 </span>
                               );
@@ -523,6 +534,18 @@ export default function TasksPage() {
                               </span>
                             )}
                           </div>
+                        )}
+
+                        {/* Social Media Task Link */}
+                        {task.dimensions.includes("social_media") && (
+                          <a
+                            href="/dashboard/social"
+                            className="flex items-center gap-2 mt-3 p-2 bg-orange-50 border border-orange-200 rounded-lg text-orange-700 text-sm hover:bg-orange-100 transition-colors"
+                          >
+                            <span className="text-lg">📱</span>
+                            <span className="flex-1">Open in Social Studio</span>
+                            <span className="text-xs">→</span>
+                          </a>
                         )}
 
                         {/* Footer */}
@@ -659,6 +682,28 @@ export default function TasksPage() {
                   </select>
                 </div>
               </div>
+
+              {/* Quick Social Task Templates */}
+              {formData.dimensions.includes("social_media") && (
+                <div className="mb-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
+                  <label className="block text-sm font-medium text-navy mb-2">
+                    📱 Social Content Templates
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {socialTaskTypes.map((taskType) => (
+                      <a
+                        key={taskType.id}
+                        href={`/dashboard/social?view=${taskType.action}`}
+                        className="flex items-center gap-2 p-2 bg-white rounded-lg border border-orange-200 hover:border-orange-400 hover:bg-orange-50 transition-all text-sm"
+                      >
+                        <span>{taskType.icon}</span>
+                        <span className="text-navy">{taskType.name}</span>
+                        <span className="ml-auto text-orange-400">→</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Dimensions */}
               <div className="mb-4">
