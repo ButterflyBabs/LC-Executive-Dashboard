@@ -308,6 +308,23 @@ export default function MoneyPage() {
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showAddSubscription, setShowAddSubscription] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showAddTeamMember, setShowAddTeamMember] = useState(false);
+  const [teamMemberForm, setTeamMemberForm] = useState({
+    name: "",
+    role: "",
+    type: "contractor" as const,
+    taxClassification: "1099" as const,
+    location: "US" as const,
+    paymentMethod: "Bank Draft" as const,
+    hourlyRate: "",
+    hoursPerWeek: "",
+    startDate: "",
+    revenueGenerating: false,
+    phone: "",
+    personalEmail: "",
+    businessEmail: "",
+    avatar: null as string | null,
+  });
   const [selectedPeriod, setSelectedPeriod] = useState<"weekly" | "monthly" | "quarterly" | "semi-annual" | "annual">("monthly");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [revenuePeriod, setRevenuePeriod] = useState<"day" | "week" | "month" | "quarter" | "semi" | "year">("week");
@@ -904,7 +921,10 @@ export default function MoneyPage() {
           <div className="bg-white rounded-2xl soft-shadow">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-navy">Team Members & Value Analysis</h3>
-              <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl">
+              <button 
+                onClick={() => setShowAddTeamMember(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl hover:bg-gold-light transition-colors"
+              >
                 <Plus className="w-4 h-4" />
                 Add Team Member
               </button>
@@ -1395,6 +1415,223 @@ export default function MoneyPage() {
                 </button>
                 <button type="submit" className="flex-1 px-4 py-2 bg-gold text-navy rounded-xl font-medium">
                   Add Subscription
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Team Member Modal */}
+      {showAddTeamMember && (
+        <div className="fixed inset-0 bg-navy/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-serif text-navy">Add Team Member</h2>
+              <button onClick={() => setShowAddTeamMember(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5 text-soft-taupe" />
+              </button>
+            </div>
+            <form className="space-y-6">
+              {/* Profile Picture */}
+              <div className="flex items-center gap-6">
+                <div className="w-24 h-24 rounded-full bg-navy/10 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
+                  {teamMemberForm.avatar ? (
+                    <img src={teamMemberForm.avatar} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <Users className="w-10 h-10 text-soft-taupe" />
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-2">Profile Picture</label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-navy/5 text-navy rounded-lg hover:bg-navy/10 transition-colors text-sm"
+                    >
+                      Upload Photo
+                    </button>
+                    <span className="text-xs text-soft-taupe">or drag and drop</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    value={teamMemberForm.name}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, name: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                    placeholder="e.g., Jane Smith"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Role/Title *</label>
+                  <input
+                    type="text"
+                    value={teamMemberForm.role}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, role: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                    placeholder="e.g., Marketing Specialist"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Employment Details */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Type</label>
+                  <select
+                    value={teamMemberForm.type}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, type: e.target.value as any })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                  >
+                    <option value="employee">Employee</option>
+                    <option value="contractor">Contractor</option>
+                    <option value="va">Virtual Assistant</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Tax Classification</label>
+                  <select
+                    value={teamMemberForm.taxClassification}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, taxClassification: e.target.value as any })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                  >
+                    <option value="W2">W2</option>
+                    <option value="1099">1099</option>
+                    <option value="OS">Overseas (OS)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Location</label>
+                  <select
+                    value={teamMemberForm.location}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, location: e.target.value as any })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                  >
+                    <option value="US">United States</option>
+                    <option value="OS">Overseas</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Payment Info */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Payment Method</label>
+                  <select
+                    value={teamMemberForm.paymentMethod}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, paymentMethod: e.target.value as any })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                  >
+                    <option value="Wise">Wise</option>
+                    <option value="PayPal">PayPal</option>
+                    <option value="Venmo">Venmo</option>
+                    <option value="Bank Draft">Bank Draft</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Hourly Rate ($)</label>
+                  <input
+                    type="number"
+                    value={teamMemberForm.hourlyRate}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, hourlyRate: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Hours/Week</label>
+                  <input
+                    type="number"
+                    value={teamMemberForm.hoursPerWeek}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, hoursPerWeek: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                    placeholder="40"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={teamMemberForm.phone}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, phone: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={teamMemberForm.startDate}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, startDate: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Business Email</label>
+                  <input
+                    type="email"
+                    value={teamMemberForm.businessEmail}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, businessEmail: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                    placeholder="name@company.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-1">Personal Email</label>
+                  <input
+                    type="email"
+                    value={teamMemberForm.personalEmail}
+                    onChange={(e) => setTeamMemberForm({ ...teamMemberForm, personalEmail: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none focus:border-navy"
+                    placeholder="name@personal.com"
+                  />
+                </div>
+              </div>
+
+              {/* Revenue Generating Toggle */}
+              <div className="flex items-center gap-3 p-4 bg-cream-dark/30 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="revenueGenerating"
+                  checked={teamMemberForm.revenueGenerating}
+                  onChange={(e) => setTeamMemberForm({ ...teamMemberForm, revenueGenerating: e.target.checked })}
+                  className="w-5 h-5 rounded border-gray-300 text-navy focus:ring-navy"
+                />
+                <label htmlFor="revenueGenerating" className="text-sm font-medium text-navy">
+                  This team member generates direct revenue
+                </label>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddTeamMember(false)}
+                  className="flex-1 px-6 py-3 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-colors shadow-glow"
+                >
+                  Add Team Member
                 </button>
               </div>
             </form>
