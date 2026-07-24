@@ -136,15 +136,17 @@ function SortableBusiness({
           return (
             <div
               key={segment.id}
-              className="rounded-xl border-2 transition-all cursor-pointer overflow-hidden"
+              className="rounded-xl border-2 transition-all overflow-hidden"
               style={{
                 borderColor: segment.color,
                 backgroundColor: isExpanded ? segment.color + "10" : "white",
               }}
-              onClick={() => toggleExpand(segment.id)}
             >
-              {/* Card Header */}
-              <Link href={`/dashboard/segments/${segment.slug}`} className="block p-4 flex items-start justify-between hover:bg-gray-50 transition-colors">
+              {/* Card Header - Clickable */}
+              <Link 
+                href={`/dashboard/segments/${segment.slug}`} 
+                className="block p-4 flex items-start justify-between hover:bg-gray-50 transition-colors cursor-pointer"
+              >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
@@ -242,14 +244,20 @@ function SortableBusiness({
                 </div>
               )}
 
-              {/* Collapse Indicator */}
-              <div className="px-4 py-2 bg-gray-50 flex items-center justify-center">
+              {/* Expand/Collapse Button */}
+              <button 
+                onClick={() => toggleExpand(segment.id)}
+                className="w-full px-4 py-2 bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors"
+              >
+                <span className="text-sm text-soft-taupe mr-2">
+                  {isExpanded ? "Show Less" : "Show More"}
+                </span>
                 <ChevronRight
                   className={`w-5 h-5 text-soft-taupe transition-transform ${
                     isExpanded ? "rotate-90" : ""
                   }`}
                 />
-              </div>
+              </button>
             </div>
           );
         })}
