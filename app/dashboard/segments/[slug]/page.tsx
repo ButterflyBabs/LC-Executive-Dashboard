@@ -269,19 +269,24 @@ export default function SegmentDetailPage() {
         <div className="flex gap-3">
           <button 
             onClick={() => setShowHealthWizard(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all"
+            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white"
+            type="button"
           >
             <Activity className="w-4 h-4" />
             Health Check
           </button>
           <button 
             onClick={autoCalculateHealth}
-            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all"
+            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white"
+            type="button"
           >
             <RefreshCw className="w-4 h-4" />
             Auto-Calculate
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow">
+          <button 
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow"
+            type="button"
+          >
             <Plus className="w-4 h-4" />
             Add Task
           </button>
