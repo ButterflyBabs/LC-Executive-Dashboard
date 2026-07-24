@@ -237,16 +237,17 @@ export default function SegmentDetailPage() {
             <p className="text-soft-taupe max-w-2xl">{segment?.description || ''}</p>
           </div>
         </div>
-        <div className="flex gap-3" style={{zIndex: 100}}>
+        <div className="flex gap-3" style={{zIndex: 9999, position: 'relative'}}>
           <button 
             onClick={() => {
               console.log('Health Check clicked');
               setShowHealthWizard(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white shadow-md"
+            className="flex items-center gap-2 px-4 py-2 border-2 border-navy text-navy rounded-xl hover:bg-navy hover:text-white transition-all bg-white shadow-lg font-medium"
             type="button"
+            style={{minWidth: '140px'}}
           >
-            <Activity className="w-4 h-4" />
+            <Activity className="w-5 h-5" />
             Health Check
           </button>
           <button 
@@ -254,17 +255,19 @@ export default function SegmentDetailPage() {
               console.log('Auto-Calculate clicked');
               autoCalculateHealth();
             }}
-            className="flex items-center gap-2 px-4 py-2 border border-navy/20 text-navy rounded-xl hover:bg-navy/5 transition-all bg-white shadow-md"
+            className="flex items-center gap-2 px-4 py-2 border-2 border-navy text-navy rounded-xl hover:bg-navy hover:text-white transition-all bg-white shadow-lg font-medium"
             type="button"
+            style={{minWidth: '140px'}}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-5 h-5" />
             Auto-Calculate
           </button>
           <button 
-            className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow"
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-xl font-semibold hover:bg-gold-light transition-all shadow-glow border-2 border-gold"
             type="button"
+            style={{minWidth: '120px'}}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
             Add Task
           </button>
         </div>
